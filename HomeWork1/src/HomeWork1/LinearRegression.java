@@ -22,13 +22,25 @@ public class LinearRegression implements Classifier {
 		m_ClassIndex = trainingData.classIndex();
 		//since class attribute is also an attribute we subtract 1
 		m_truNumAttributes = trainingData.numAttributes() - 1;
-//		setAlpha(trainingData);
-		m_coefficients = gradientDescent(trainingData);
-		
+		setAlpha(trainingData);
 	}
 	
-	public void setAlpha(double alpha) throws Exception {
-		m_alpha = alpha;
+	private void setAlpha(Instances data) throws Exception {
+		double bestAlpha = -1;
+		double bestSE = Double.MAX_VALUE;
+		for(int i = -17; i <= 2; i++){
+			m_alpha = Math.pow(3, i);
+			m_coefficients = gradientDescent(data);
+
+			double se = calculateSE(data);
+			System.out.println("i=" + i + " alpha=" + m_alpha + ", squared error for 20k iterations=" + se);
+			if( (! Double.isNaN(se)) && se < bestSE){
+				bestSE = se;
+				bestAlpha = m_alpha;
+			}
+			System.out.println("Best alpha: " + bestAlpha);
+		}
+		m_alpha = bestAlpha;
 	}
 	
 	/**
@@ -41,14 +53,7 @@ public class LinearRegression implements Classifier {
 	 */
 	private double[] gradientDescent(Instances trainingData) throws Exception {
 		//Guess some value for [teta_0, teta_1, ... , teta_n]
-		m_coefficients = randomVector(m_truNumAttributes + 1, 20);
-//		while(calculateSE(trainingData) > EPSILON){
-//			
-//			// 100 iterations
-//			for(int p = 0; p < 100; p++){
-//				m_coefficients = updateTetaVector(trainingData, m_coefficients);
-//			}
-//		}
+		m_coefficients = new double[m_truNumAttributes + 1];
 		for(int i = 0; i < 20000; i++){
 			m_coefficients = updateTetaVector(trainingData, m_coefficients);
 		}
@@ -56,14 +61,6 @@ public class LinearRegression implements Classifier {
 		return m_coefficients;
 	}
 	
-	private static double[] randomVector(int size, int maxValue) {
-		double[] result = new double[size];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = Math.random() * maxValue;
-		}
-		return result;
-	}
-
 	private double[] updateTetaVector(Instances trainingData, double[] teta_vecor) {
 		double[] updated_teta_vector = new double[teta_vecor.length];
 		
@@ -76,7 +73,7 @@ public class LinearRegression implements Classifier {
 	}
 
 	private double calculateNewTetaValueForIndex(
-			int tetaIdx, double[] teta_vecor, Instances trainingData) {
+		int tetaIdx, double[] teta_vecor, Instances trainingData) {
 		double sum = 0;
 		
 		// iterate data instances

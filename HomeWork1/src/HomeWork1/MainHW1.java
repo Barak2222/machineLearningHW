@@ -46,17 +46,7 @@ public class MainHW1 {
 		
 		//train classifier
 		LinearRegression linearRegressionClassifier = new LinearRegression();
-		
-		for(int i = -17; i <= 2; i++){
-			double alpha = Math.pow(3, i);
-			linearRegressionClassifier.setAlpha(alpha);
-			linearRegressionClassifier.buildClassifier(trainingData);
-
-//		calculate error on test data
-			double se = linearRegressionClassifier.calculateSE(testingData);
-			System.out.println("i=" + i + " alpha=" + alpha + ", squared error for 20k iterations=" + se);
-		}
-		
+		linearRegressionClassifier.buildClassifier(trainingData);
 	}
 
 }
