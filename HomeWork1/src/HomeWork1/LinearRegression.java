@@ -31,6 +31,23 @@ public class LinearRegression implements Classifier {
 			m_coefficients[i] = Math.random();
 
 		setAlpha(trainingData);
+
+		double cur_error = Double.MAX_VALUE;
+		System.out.println("Using alpha: " + m_alpha);
+		boolean found_thetas = false;
+		int count = 1;
+		while (!found_thetas){
+			System.out.println("Iteration " + count++);
+			for(int i = 0; i < 100; i++){
+				m_coefficients = updateTetaVector(trainingData, m_coefficients);
+			double tempError = calculateSE(trainingData);
+			if (cur_error -  tempError > EPSILON)
+				cur_error = tempError;
+			else
+				found_thetas = true;
+			}
+		}
+		System.out.println("Found correct thetas");
 	}
 	
 	private void setAlpha(Instances data) throws Exception {
