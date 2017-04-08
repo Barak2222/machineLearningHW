@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Random;
 
 import weka.core.Instances;
 
@@ -31,9 +32,7 @@ public class MainHW1 {
 	 */
 	public static Instances loadData(String fileName) throws IOException{
 		BufferedReader datafile = readDataFile(fileName);
-
 		Instances data = new Instances(datafile);
-		data.setClassIndex(data.numAttributes() - 1);
 		return data;
 	}
 	
@@ -41,8 +40,15 @@ public class MainHW1 {
 		//load data
 		Instances trainingData = loadData(TRAINING_SET_PATH);
 		Instances testingData = loadData(TESTING_SET_PATH);
-		trainingData.setClassIndex(14);
-		testingData.setClassIndex(14);
+
+		// Set class index
+		trainingData.setClassIndex(trainingData.numAttributes() - 1);
+		testingData.setClassIndex(testingData.numAttributes() - 1);
+
+		// Shuffle data
+		Random random = new Random();
+		trainingData.randomize(random);
+		testingData.randomize(random);
 		
 		//train classifier
 		LinearRegression linearRegressionClassifier = new LinearRegression();

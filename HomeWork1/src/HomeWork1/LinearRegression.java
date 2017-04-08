@@ -53,18 +53,23 @@ public class LinearRegression implements Classifier {
 	private void setAlpha(Instances data) throws Exception {
 		double bestAlpha = -1;
 		double bestSE = Double.MAX_VALUE;
+		double tempSE;
 		for(int i = -17; i <= 2; i++){
 			m_alpha = Math.pow(3, i);
-			m_coefficients = gradientDescent(data);
 
-			double se = calculateSE(data);
-			System.out.println("i=" + i + " alpha=" + m_alpha + ", squared error for 20k iterations=" + se);
-			if( (! Double.isNaN(se)) && se < bestSE){
-				bestSE = se;
+			for(int j = 0; j < 20000; j++)
+				m_coefficients = gradientDescent(data);
+			tempSE = calculateSE(data);
+			System.out.println("i=" + i + " alpha=" + m_alpha + ", squared error for 20k iterations=" + tempSE);
+			if (Double.isNaN(tempSE))
+				tempSE = Double.MAX_VALUE;
+
+			if(tempSE < bestSE){
+				bestSE = tempSE;
 				bestAlpha = m_alpha;
 			}
-			System.out.println("Best alpha: " + bestAlpha);
 		}
+		System.out.println("Best alpha: " + bestAlpha);
 		m_alpha = bestAlpha;
 	}
 	
@@ -77,12 +82,8 @@ public class LinearRegression implements Classifier {
 	 * @throws Exception
 	 */
 	private double[] gradientDescent(Instances trainingData) throws Exception {
-		//Guess some value for [teta_0, teta_1, ... , teta_n]
-		m_coefficients = new double[m_truNumAttributes + 1];
-		for(int i = 0; i < 20000; i++){
-			m_coefficients = updateTetaVector(trainingData, m_coefficients);
-		}
-		
+		m_coefficients = updateTetaVector(trainingData, m_coefficients);
+
 		return m_coefficients;
 	}
 	
@@ -90,35 +91,41 @@ public class LinearRegression implements Classifier {
 		double[] updated_teta_vector = new double[teta_vecor.length];
 		
 		// iterate teta_0, teta_1, ..., teta_n
-		for(int tetaIdx = 0; tetaIdx < teta_vecor.length; tetaIdx++){
-			updated_teta_vector[tetaIdx] = calculateNewTetaValueForIndex(
-					tetaIdx, teta_vecor, trainingData);
-		}
+		for(int tetaIdx = 0; tetaIdx < teta_vecor.length; tetaIdx++)
+			updated_teta_vector[tetaIdx] = calculateNewTetaValueForIndex(tetaIdx, teta_vecor, trainingData);
 		return updated_teta_vector;
 	}
 
 	private double calculateNewTetaValueForIndex(
 		int tetaIdx, double[] teta_vecor, Instances trainingData) {
 		double sum = 0;
-		
+
 		// iterate data instances
 		for (int i = 0; i < trainingData.numInstances(); i++) { 
-			Instance instance = trainingData.instance(i); 
+			Instance instance = trainingData.instance(i);
+
+			// No need to multiply first theta
 			double sumForInstance = teta_vecor[0];
-			
+
 			// iterate attributes
-			for (int k = 0; k < m_truNumAttributes + 1; k++) {
+			for (int k = 1; k < m_truNumAttributes + 1; k++) {
 				double attributeValue = instance.value(k);
+
+				// Add theta_n * x_n to the sum
+				sumForInstance+= teta_vecor[k] * attributeValue;
+
+				// Subtract the true output from the sum
 				if(k == m_ClassIndex){
-					sumForInstance-= attributeValue;
+					sumForInstance -= attributeValue;
 					continue;
 				}
-				sumForInstance+= teta_vecor[k + 1] * attributeValue;
+
 			}
-			if(tetaIdx != 0){
-				sumForInstance*= instance.value(tetaIdx);
-			}
-			sum+= sumForInstance;
+			// For each theta (except theta_0) multiple the sum by x_n
+			if(tetaIdx != 0)
+				sumForInstance *= instance.value(tetaIdx);
+
+			sum += sumForInstance;
 		}
 		return teta_vecor[tetaIdx] - (m_alpha * sum / trainingData.numInstances());
 	}
@@ -132,17 +139,14 @@ public class LinearRegression implements Classifier {
 	 * @throws Exception
 	 */
 	public double regressionPrediction(Instance instance) throws Exception {
-		double result = 0;
-		for (int k = 0; k < m_truNumAttributes + 1; k++) {
-			double attributeValue = instance.value(k);
-			if(k == 0){
-				result+= m_coefficients[0];
+		// No need to multiply the first theta
+		double result = m_coefficients[0];
+		for (int k = 1; k < m_truNumAttributes + 1; k++) {
+			if(k == m_ClassIndex)
 				continue;
-			}
-			if(k == m_ClassIndex){
-				continue;
-			}
-			result+= m_coefficients[k] * attributeValue;
+
+			// Multiply theta_n with appropriate x_n and add to result
+			result+= m_coefficients[k] * instance.value(k);
 		}
 		return result;
 	}
@@ -151,18 +155,18 @@ public class LinearRegression implements Classifier {
 	 * Calculates the total squared error over the data on a linear regression
 	 * predictor with weights given by m_coefficients.
      *
-	 * @param testData
+	 * @param data
 	 * @return
 	 * @throws Exception
 	 */
-	public double calculateSE(Instances testData) throws Exception {
+	public double calculateSE(Instances data) throws Exception {
 		double sum = 0;
-		for (int i = 0; i < testData.numInstances(); i++) { 
-			Instance instance = testData.instance(i); 
+		for (int i = 0; i < data.numInstances(); i++) {
+			Instance instance = data.instance(i);
 			double prediction = regressionPrediction(instance);
 			sum+= Math.pow(prediction - instance.value(m_ClassIndex), 2);		
 		}
-		return (sum / testData.numInstances()) / 2;
+		return sum / (2.0 * (data.numInstances()));
 	}
     
     @Override
