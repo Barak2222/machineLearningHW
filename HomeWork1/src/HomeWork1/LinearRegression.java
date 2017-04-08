@@ -22,6 +22,14 @@ public class LinearRegression implements Classifier {
 		m_ClassIndex = trainingData.classIndex();
 		//since class attribute is also an attribute we subtract 1
 		m_truNumAttributes = trainingData.numAttributes() - 1;
+
+		//Guess some value for [teta_0, teta_1, ... , teta_n]
+		m_coefficients = new double[m_truNumAttributes + 1];
+
+		// Init thetas to random values
+		for (int i = 0; i < m_coefficients.length; i++)
+			m_coefficients[i] = Math.random();
+
 		setAlpha(trainingData);
 	}
 	
