@@ -18,36 +18,48 @@ public class LinearRegression implements Classifier {
 	//finds its weights.
 	@Override
 	public void buildClassifier(Instances trainingData) throws Exception {
+		double tempError, curError;
+		boolean foundThetas;
 		trainingData = new Instances(trainingData);
 		m_ClassIndex = trainingData.classIndex();
 		//since class attribute is also an attribute we subtract 1
 		m_truNumAttributes = trainingData.numAttributes() - 1;
-
 		//Guess some value for [teta_0, teta_1, ... , teta_n]
 		m_coefficients = new double[m_truNumAttributes + 1];
 
-		// Init thetas to random values
-		for (int i = 0; i < m_coefficients.length; i++)
-			m_coefficients[i] = Math.random();
-
+		// Reset m_coeeficients BEFORE testing whem in setAlpha function
+		resetThetas();
 		setAlpha(trainingData);
 
-		double cur_error = Double.MAX_VALUE;
-		System.out.println("Using alpha: " + m_alpha);
-		boolean found_thetas = false;
-		int count = 1;
-		while (!found_thetas){
-			System.out.println("Iteration " + count++);
+		// Reset m_coeeficients AFTER testing whem in setAlpha function
+		resetThetas();
+
+		curError = Double.MAX_VALUE;
+		foundThetas = false;
+		while (!foundThetas){
+			// Check every 100 iterations if the error difference is smaller than EPSILON
 			for(int i = 0; i < 100; i++){
-				m_coefficients = updateTetaVector(trainingData, m_coefficients);
-			double tempError = calculateSE(trainingData);
-			if (cur_error -  tempError > EPSILON)
-				cur_error = tempError;
-			else
-				found_thetas = true;
+				m_coefficients = gradientDescent(trainingData);
+
+			tempError = calculateSE(trainingData);
+
+			// Exit loop when error margin is acceptable
+			if (curError -  tempError < EPSILON)
+				foundThetas = true;
+
+			curError = tempError;
 			}
 		}
 		System.out.println("Found correct thetas");
+	}
+	/**
+	 * Initialize thetas with random values
+	 *
+	 * @throws Exception
+	 */
+	private void resetThetas() throws Exception {
+		for (int i = 0; i < m_coefficients.length; i++)
+			m_coefficients[i] = Math.random();
 	}
 	
 	private void setAlpha(Instances data) throws Exception {
