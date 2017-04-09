@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
+import java.util.Arrays;
 
 import weka.core.Instances;
 
@@ -39,7 +40,6 @@ public class MainHW1 {
 	public static void main(String[] args) throws Exception {
 		//load data
 		Instances trainingData = loadData(TRAINING_SET_PATH);
-		Instances testingData = loadData(TESTING_SET_PATH);
 
 		// Set class index
 		trainingData.setClassIndex(trainingData.numAttributes() - 1);
@@ -52,8 +52,10 @@ public class MainHW1 {
 		LinearRegression linearRegressionClassifier = new LinearRegression();
 		linearRegressionClassifier.buildClassifier(trainingData);
 
-		testingData.setClassIndex(testingData.numAttributes() - 1);
-		testingData.randomize(random);
+		Instances testingData = loadData(TESTING_SET_PATH);
+
+		System.out.println("The weights are: " + Arrays.toString(linearRegressionClassifier.getCoefficients()));
+		System.out.println("The error is: " + linearRegressionClassifier.calculateSE(testingData));
 	}
 
 }

@@ -50,7 +50,9 @@ public class LinearRegression implements Classifier {
 			curError = tempError;
 			}
 		}
-		System.out.println("Found correct thetas");
+	}
+	public double[] getCoefficients() {
+		return m_coefficients;
 	}
 	/**
 	 * Initialize thetas with random values
