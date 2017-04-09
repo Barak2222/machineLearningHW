@@ -43,16 +43,17 @@ public class MainHW1 {
 
 		// Set class index
 		trainingData.setClassIndex(trainingData.numAttributes() - 1);
-		testingData.setClassIndex(testingData.numAttributes() - 1);
 
 		// Shuffle data
 		Random random = new Random();
 		trainingData.randomize(random);
-		testingData.randomize(random);
-		
+
 		//train classifier
 		LinearRegression linearRegressionClassifier = new LinearRegression();
 		linearRegressionClassifier.buildClassifier(trainingData);
+
+		testingData.setClassIndex(testingData.numAttributes() - 1);
+		testingData.randomize(random);
 	}
 
 }

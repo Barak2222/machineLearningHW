@@ -110,15 +110,13 @@ public class LinearRegression implements Classifier {
 			// iterate attributes
 			for (int k = 1; k < m_truNumAttributes + 1; k++) {
 				double attributeValue = instance.value(k);
-
-				// Add theta_n * x_n to the sum
-				sumForInstance+= teta_vecor[k] * attributeValue;
-
-				// Subtract the true output from the sum
+				// Subtract the true output from the sum continue to next iteration
 				if(k == m_ClassIndex){
 					sumForInstance -= attributeValue;
 					continue;
 				}
+				// Add theta_n * x_n to the sum
+				sumForInstance+= teta_vecor[k] * attributeValue;
 
 			}
 			// For each theta (except theta_0) multiple the sum by x_n
