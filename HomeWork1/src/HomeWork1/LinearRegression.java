@@ -96,17 +96,12 @@ public class LinearRegression implements Classifier {
 	 * @throws Exception
 	 */
 	private double[] gradientDescent(Instances trainingData) throws Exception {
-		m_coefficients = updateTetaVector(trainingData, m_coefficients);
-
-		return m_coefficients;
-	}
-	
-	private double[] updateTetaVector(Instances trainingData, double[] teta_vecor) {
-		double[] updated_teta_vector = new double[teta_vecor.length];
+		double[] updated_teta_vector = new double[m_coefficients.length];
 		
 		// iterate teta_0, teta_1, ..., teta_n
-		for(int tetaIdx = 0; tetaIdx < teta_vecor.length; tetaIdx++)
-			updated_teta_vector[tetaIdx] = calculateNewTetaValueForIndex(tetaIdx, teta_vecor, trainingData);
+		for(int tetaIdx = 0; tetaIdx < m_coefficients.length; tetaIdx++)
+			updated_teta_vector[tetaIdx] = calculateNewTetaValueForIndex(tetaIdx, m_coefficients, trainingData);
+
 		return updated_teta_vector;
 	}
 
@@ -122,7 +117,7 @@ public class LinearRegression implements Classifier {
 			double sumForInstance = teta_vecor[0];
 
 			// iterate attributes
-			for (int k = 1; k < m_truNumAttributes + 1; k++) {
+			for (int k = 0; k < m_truNumAttributes + 1; k++) {
 				double attributeValue = instance.value(k);
 				// Subtract the true output from the sum continue to next iteration
 				if(k == m_ClassIndex){
@@ -130,12 +125,12 @@ public class LinearRegression implements Classifier {
 					continue;
 				}
 				// Add theta_n * x_n to the sum
-				sumForInstance+= teta_vecor[k] * attributeValue;
+				sumForInstance+= teta_vecor[k+1] * attributeValue;
 
 			}
 			// For each theta (except theta_0) multiple the sum by x_n
 			if(tetaIdx != 0)
-				sumForInstance *= instance.value(tetaIdx);
+				sumForInstance *= instance.value(tetaIdx - 1);
 
 			sum += sumForInstance;
 		}
@@ -153,12 +148,12 @@ public class LinearRegression implements Classifier {
 	public double regressionPrediction(Instance instance) throws Exception {
 		// No need to multiply the first theta
 		double result = m_coefficients[0];
-		for (int k = 1; k < m_truNumAttributes + 1; k++) {
+		for (int k = 0; k < m_truNumAttributes + 1; k++) {
 			if(k == m_ClassIndex)
 				continue;
 
 			// Multiply theta_n with appropriate x_n and add to result
-			result+= m_coefficients[k] * instance.value(k);
+			result+= m_coefficients[k+1] * instance.value(k);
 		}
 		return result;
 	}
