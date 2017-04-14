@@ -25,7 +25,6 @@ public class LinearRegression implements Classifier {
 		m_truNumAttributes = trainingData.numAttributes() - 1;
 		
 		// Guess some value for [teta_0, teta_1, ... , teta_n]
-		m_coefficients = randomVector(m_truNumAttributes + 1);
 		setAlpha(trainingData);
 
 		// alpha was chosen, reset theta vector
@@ -48,11 +47,12 @@ public class LinearRegression implements Classifier {
 	}
 	
 	private static double[] randomVector(int length){
-		double[] vector = new double[length];
-		for(int i = 0; i < length; i++){
-			vector[i] = 2 * Math.random() - 1;
-		}
-		return vector;
+//		double[] vector = new double[length];
+//		for(int i = 0; i < length; i++){
+//			vector[i] = 2 * Math.random() - 1;
+//		}
+//		return vector;
+		return new double[length];
 	}
 	
 	private void setAlpha(Instances data) throws Exception {
@@ -60,6 +60,7 @@ public class LinearRegression implements Classifier {
 		double bestSE = Double.MAX_VALUE;
 		double tempSE;
 		for(int i = -17; i <= 2; i++){
+			m_coefficients = randomVector(m_truNumAttributes + 1);
 			m_alpha = Math.pow(3, i);
 
 			for(int j = 0; j < 20000; j++)
@@ -95,8 +96,7 @@ public class LinearRegression implements Classifier {
 		return updated_teta_vector;
 	}
 	
-	private double calculateNewTetaValueForIndex(
-		int tetaIdx, double[] teta_vecor, Instances trainingData) {
+	private double calculateNewTetaValueForIndex( int tetaIdx, double[] teta_vecor, Instances trainingData) {
 		double sum = 0;
 
 		// iterate data instances
