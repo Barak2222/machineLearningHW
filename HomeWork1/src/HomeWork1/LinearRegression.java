@@ -14,54 +14,45 @@ public class LinearRegression implements Classifier {
 	private double[] m_coefficients;
 	private double m_alpha;
 	
-	//the method which runs to train the linear regression predictor, i.e.
-	//finds its weights.
+	// the method which runs to train the linear regression predictor, i.e.
+	// finds its weights.
 	@Override
 	public void buildClassifier(Instances trainingData) throws Exception {
-		double tempError, curError;
-		boolean foundThetas;
 		trainingData = new Instances(trainingData);
 		m_ClassIndex = trainingData.classIndex();
-		//since class attribute is also an attribute we subtract 1
+		
+		// since class attribute is also an attribute we subtract 1
 		m_truNumAttributes = trainingData.numAttributes() - 1;
-		//Guess some value for [teta_0, teta_1, ... , teta_n]
-		m_coefficients = new double[m_truNumAttributes + 1];
-
-		// Reset m_coeeficients BEFORE testing whem in setAlpha function
-		resetThetas();
+		
+		// Guess some value for [teta_0, teta_1, ... , teta_n]
+		m_coefficients = randomVector(m_truNumAttributes + 1);
 		setAlpha(trainingData);
 
-		// Reset m_coeeficients AFTER testing whem in setAlpha function
-		resetThetas();
+		// alpha was chosen, reset theta vector
+		m_coefficients = randomVector(m_truNumAttributes + 1);
+		double prevError = Double.MAX_VALUE;
+		double currError = calculateSE(trainingData);;
 
-		curError = Double.MAX_VALUE;
-		foundThetas = false;
-		while (!foundThetas){
-			// Check every 100 iterations if the error difference is smaller than EPSILON
+		// Check every 100 iterations if the error difference is smaller than EPSILON
+		while (prevError - currError > EPSILON){
+			prevError = currError;
 			for(int i = 0; i < 100; i++){
 				m_coefficients = gradientDescent(trainingData);
-
-			tempError = calculateSE(trainingData);
-
-			// Exit loop when error margin is acceptable
-			if (curError -  tempError < EPSILON)
-				foundThetas = true;
-
-			curError = tempError;
 			}
+			currError = calculateSE(trainingData);
 		}
 	}
+	
 	public double[] getCoefficients() {
 		return m_coefficients;
 	}
-	/**
-	 * Initialize thetas with random values
-	 *
-	 * @throws Exception
-	 */
-	private void resetThetas() throws Exception {
-		for (int i = 0; i < m_coefficients.length; i++)
-			m_coefficients[i] = Math.random();
+	
+	private static double[] randomVector(int length){
+		double[] vector = new double[length];
+		for(int i = 0; i < length; i++){
+			vector[i] = 2 * Math.random() - 1;
+		}
+		return vector;
 	}
 	
 	private void setAlpha(Instances data) throws Exception {
@@ -101,10 +92,9 @@ public class LinearRegression implements Classifier {
 		// iterate teta_0, teta_1, ..., teta_n
 		for(int tetaIdx = 0; tetaIdx < m_coefficients.length; tetaIdx++)
 			updated_teta_vector[tetaIdx] = calculateNewTetaValueForIndex(tetaIdx, m_coefficients, trainingData);
-
 		return updated_teta_vector;
 	}
-
+	
 	private double calculateNewTetaValueForIndex(
 		int tetaIdx, double[] teta_vecor, Instances trainingData) {
 		double sum = 0;
@@ -119,19 +109,20 @@ public class LinearRegression implements Classifier {
 			// iterate attributes
 			for (int k = 0; k < m_truNumAttributes + 1; k++) {
 				double attributeValue = instance.value(k);
+				
 				// Subtract the true output from the sum continue to next iteration
 				if(k == m_ClassIndex){
 					sumForInstance -= attributeValue;
 					continue;
 				}
+				
 				// Add theta_n * x_n to the sum
 				sumForInstance+= teta_vecor[k+1] * attributeValue;
-
 			}
+			
 			// For each theta (except theta_0) multiple the sum by x_n
 			if(tetaIdx != 0)
 				sumForInstance *= instance.value(tetaIdx - 1);
-
 			sum += sumForInstance;
 		}
 		return teta_vecor[tetaIdx] - (m_alpha * sum / trainingData.numInstances());
