@@ -47,14 +47,19 @@ public class LinearRegression implements Classifier {
 	}
 	
 	private static double[] randomVector(int length){
-//		double[] vector = new double[length];
-//		for(int i = 0; i < length; i++){
-//			vector[i] = 2 * Math.random() - 1;
-//		}
-//		return vector;
-		return new double[length];
+		double[] vector = new double[length];
+		for(int i = 0; i < length; i++){
+			vector[i] = 2 * Math.random() - 1;
+		}
+		return vector;
 	}
 	
+	/**
+	 * For each alpha evaluate the SE given by the linear regression algorithm.
+	 * Choose the best alpha among [3^-17, 3^-16 ... 3^2]
+	 * @param data
+	 * @throws Exception
+	 */
 	private void setAlpha(Instances data) throws Exception {
 		double bestAlpha = -1;
 		double bestSE = Double.MAX_VALUE;
@@ -66,7 +71,6 @@ public class LinearRegression implements Classifier {
 			for(int j = 0; j < 20000; j++)
 				m_coefficients = gradientDescent(data);
 			tempSE = calculateSE(data);
-			System.out.println("i=" + i + " alpha=" + m_alpha + ", squared error for 20k iterations=" + tempSE);
 			if (Double.isNaN(tempSE))
 				tempSE = Double.MAX_VALUE;
 
@@ -75,7 +79,6 @@ public class LinearRegression implements Classifier {
 				bestAlpha = m_alpha;
 			}
 		}
-		System.out.println("Best alpha: " + bestAlpha);
 		m_alpha = bestAlpha;
 	}
 	

@@ -10,8 +10,9 @@ import java.util.Arrays;
 import weka.core.Instances;
 
 public class MainHW1 {
-	private static final String TRAINING_SET_PATH = "C:/cod/machineLearning/data/wind_training.txt";
-	private static final String TESTING_SET_PATH = "C:/cod/machineLearning/data/wind_testing.txt";
+	// The data should be in the project directory
+	private static final String TRAINING_SET_RELATIVE_PATH = "wind_training.txt";
+	private static final String TESTING_SET_RELATIVE_PATH = "wind_testing.txt";
 	
 	public static BufferedReader readDataFile(String filename) {
 		BufferedReader inputReader = null;
@@ -39,7 +40,7 @@ public class MainHW1 {
 	
 	public static void main(String[] args) throws Exception {
 		//load data
-		Instances trainingData = loadData(TRAINING_SET_PATH);
+		Instances trainingData = loadData(TRAINING_SET_RELATIVE_PATH);
 
 		// Set class index
 		trainingData.setClassIndex(trainingData.numAttributes() - 1);
@@ -52,7 +53,7 @@ public class MainHW1 {
 		LinearRegression linearRegressionClassifier = new LinearRegression();
 		linearRegressionClassifier.buildClassifier(trainingData);
 
-		Instances testingData = loadData(TESTING_SET_PATH);
+		Instances testingData = loadData(TESTING_SET_RELATIVE_PATH);
 
 		System.out.println("The weights are: " + Arrays.toString(linearRegressionClassifier.getCoefficients()));
 		System.out.println("The error is: " + linearRegressionClassifier.calculateSE(testingData));
