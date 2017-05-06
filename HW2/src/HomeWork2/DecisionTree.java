@@ -1,10 +1,11 @@
 package HomeWork2;
 
-import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import weka.classifiers.Classifier;
@@ -285,15 +286,58 @@ public class DecisionTree implements Classifier {
     
     @Override
 	public double classifyInstance(Instance instance) {
+    	
+    	// Try to find rule that perfectly matches
     	for (Rule rule : rules) {
 			if(isRuleApplied(rule, instance)){
 				return rule.returnValue;
 			}
 		}
-    	throw new IllegalArgumentException();
+    	
+    	// Find rule with largest amout of consequitive conditions
+    	int longestRuleChainSize = -1;
+    	List<Rule> rulesWithLongestChain = new ArrayList<>();
+    	
+    	for (Rule rule : rules) {
+			int chainSize = calculateLongestRulesSequence(rule, instance);
+			if(chainSize > longestRuleChainSize){
+				rulesWithLongestChain = new ArrayList<>();
+				longestRuleChainSize = chainSize;
+			}
+			if(chainSize == longestRuleChainSize){
+				rulesWithLongestChain.add(rule);
+			}
+		}
+    	if(rulesWithLongestChain.size() == 1){
+    		return rulesWithLongestChain.get(0).returnValue;
+    	}
+    	
+    	// Classify with the majority of return values of rules in rulesWithLongestChain
+    	int firstClassCount = 0;
+    	int secondClassCount = 0;
+    	for (Rule rule : rulesWithLongestChain) {
+			if(rule.returnValue == 0.0){
+				firstClassCount++;
+			} else {
+				secondClassCount++;
+			}
+		}
+    	return (firstClassCount > secondClassCount) ? 0.0 : 1.0;
 	}
     
-    @Override
+    private int calculateLongestRulesSequence(Rule rule, Instance instance) {
+    	List<BasicRule> logicList = rule.basicRule;
+		int count = 0;
+    	for (BasicRule basicRule : logicList) {
+			if(instance.value(basicRule.attributeIndex) != basicRule.attributeValue){
+				return count;
+			}
+			count++;
+		}
+		return count;
+	}
+
+	@Override
 	public double[] distributionForInstance(Instance arg0) throws Exception {
 		// Don't change
 		return null;
