@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import weka.classifiers.Classifier;
+import weka.core.Capabilities;
 import weka.core.Instance;
-import weka.core.InstanceComparator;
 import weka.core.Instances;
 
 class BasicRule {
@@ -35,8 +35,19 @@ public class DecisionTree implements Classifier {
    	private List<Rule> rules = new ArrayList<Rule>();
 
 	@Override
-	public void buildClassifier(Instances arg0) throws Exception {
+	public void buildClassifier(Instances instances) throws Exception {
+		// TODO
+		
+		// preProcessing
+		
+		buildTree(instances);
+		
+		// postProcessing
+	}
 
+	private void buildTree(Instances instances) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public void setPruningMode(PruningMode pruningMode) {
@@ -50,6 +61,7 @@ public class DecisionTree implements Classifier {
     @Override
 	public double classifyInstance(Instance instance) {
 		//TODO: implement this method
+    	return 0;
 	}
     
     @Override
