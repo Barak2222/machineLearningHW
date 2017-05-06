@@ -1,5 +1,6 @@
 package HomeWork2;
 
+import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,12 +49,10 @@ public class DecisionTree implements Classifier {
 	public void buildClassifier(Instances instances) throws Exception {
 		classIndex = 9;
 		
-		// TODO
-		
 		// preProcessing
 		
 		buildTree(instances);
-		
+		System.out.println("tree built");
 		// postProcessing
 	}
 
@@ -75,44 +74,54 @@ public class DecisionTree implements Classifier {
 		while(queue.size() > 0){
 			Node nodeToProcess = queue.poll();
 			if(nodeToProcess.isPerfectlyClassified){
+				nodeToProcess.instances = null; // Free memory
 				
-				// Free memory
-				nodeToProcess.instances = null;
+				// Node is leaf => add rule
+				rules.add(nodeToProcess.nodeRule);
 				continue;
 			}
-			Instances instancesThatGoToNode = nodeToProcess.instances;
 			
 			// Choose best attribute
 			int bestAttributeIndex = -1;
 			double bestInfoGain = -1;
 			for(int i = 0; i < instances.numAttributes() - 1; i++){
-				double currentInfoGain = calcInfoGain(instancesThatGoToNode, i);
+				double currentInfoGain = calcInfoGain(nodeToProcess.instances, i);
 				if(currentInfoGain > bestInfoGain){
 					bestInfoGain = currentInfoGain;
 					bestAttributeIndex = i;
 				}
 			}
 			
-			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex, instancesThatGoToNode);
+			// Case that node could not be further splitted (2 instances with same x and different class
+			if(bestAttributeIndex == -1){
+				nodeToProcess.instances = null; // Free memory
+				continue;
+			}
+			
+			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex);
+			if(nodeToProcess != rootNode){
+				nodeToProcess.instances = null; // Free memory
+			}
 			queue.addAll(Arrays.asList(nodeToProcess.children));
 		}
-		// TODO Auto-generated method stub
-		
 	}
 	
-	private Node[] buildChildren(Node parent, int attributeIndex, Instances instancesThatGoToParent) {
+	private Node[] buildChildren(Node parent, int attributeIndex) {
 		parent.attributeIndex = attributeIndex;
 		List<BasicRule> listOfParentsRules = parent.nodeRule.basicRule;
 		
 		// eg number of children
-		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = instancesThatGoToParent.attribute(attributeIndex).numValues();
-		Node[] children = new Node[NUMBER_OF_VALUES_FOR_ATTRIBUTE];
+		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = rootNode.instances.attribute(attributeIndex).numValues();
+		List<Node> children = new ArrayList<>();
 		for(int attributeValue = 0; attributeValue < NUMBER_OF_VALUES_FOR_ATTRIBUTE; attributeValue++){
 			
 			// Create new child
 			Node childNode = new Node();
 			childNode.parent = parent;
-			childNode.instances = filterInstancesWithAttributeValue(instancesThatGoToParent, attributeIndex, attributeValue);
+			childNode.instances = filterInstancesWithAttributeValue(parent.instances, attributeIndex, attributeValue);
+			if(childNode.instances.isEmpty()){
+				continue;
+			}
 			
 			// Create relevant rule
 			Rule rule = new Rule();
@@ -121,30 +130,29 @@ public class DecisionTree implements Classifier {
 			rule.basicRule = listOfChildRules;
 			childNode.nodeRule = rule;
 			
-			// Check if node is leaf
-			Double perfectlyClassifiedValue = isPerfectlyClassified(instancesThatGoToParent, rule);
-			if(perfectlyClassifiedValue != null){
+			// Check if node is a leaf
+			Double perfectlyClassifiedValue = isPerfectlyClassified(childNode.instances);
+			childNode.isPerfectlyClassified = perfectlyClassifiedValue != null;
+			if(childNode.isPerfectlyClassified){
 				rule.returnValue = perfectlyClassifiedValue;
-				childNode.isPerfectlyClassified = true;
 			}
-			children[attributeValue] = childNode;
+			children.add(childNode);
 		}
-		return children;
+		
+		Node[] result = new Node[children.size()];
+		return children.toArray(result);
 	}
 
 	// true   =>    returns class value
 	// false  =>    returns null
-	private Double isPerfectlyClassified(Instances instances, Rule r) {
-		double expectedValue = -1;
+	private Double isPerfectlyClassified(Instances instances) {
+		if(instances.isEmpty()){
+			return null;
+		}
+		double expectedValue = instances.firstInstance().value(classIndex);
 		for (Instance instance : instances) {
-			if(isRuleApplied(r, instance)){
-				if(expectedValue == -1){
-					expectedValue = instance.value(classIndex);
-				} else {
-					if(expectedValue != instance.value(classIndex)){
-						return null;
-					}
-				}
+			if(instance.value(classIndex) != expectedValue){
+				return null;
 			}
 		}
 		return expectedValue;
@@ -190,7 +198,6 @@ public class DecisionTree implements Classifier {
 		}
 		return calcEntropy(numberOfInstancesForClass);
 	}
-	
 
 	private static Instances filterInstancesThatApplyToRule(Instances source, Rule rule){
 		Instances clone = new Instances(source);
@@ -273,8 +280,12 @@ public class DecisionTree implements Classifier {
     
     @Override
 	public double classifyInstance(Instance instance) {
-		//TODO: implement this method
-    	return 0;
+    	for (Rule rule : rules) {
+			if(isRuleApplied(rule, instance)){
+				return rule.returnValue;
+			}
+		}
+    	throw new IllegalArgumentException();
 	}
     
     @Override
