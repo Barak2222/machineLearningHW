@@ -1,6 +1,5 @@
 package HomeWork2;
 
-import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -97,7 +96,6 @@ public class DecisionTree implements Classifier {
 				nodeToProcess.instances = null; // Free memory
 				continue;
 			}
-			
 			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex);
 			if(nodeToProcess != rootNode){
 				nodeToProcess.instances = null; // Free memory
@@ -251,8 +249,10 @@ public class DecisionTree implements Classifier {
 
 		// Count instances by class value
 		for (Instance instance : instancesSubset)
+			// Y = 0
 			if (instance.value(classIndex) == 0.0)
 				y0++;
+			// Y = 1
 			else
 				y1++;
 
@@ -260,17 +260,24 @@ public class DecisionTree implements Classifier {
 			pf = 0; nf = 0; Df = 0;
 			for (Instance instance1 : instancesSubset){
 				if (instance1.value(attributeIndex) == (double)attrValue){
+					// Df - number of instances for current attribute Value
 					Df++;
 					if (instance1.value(classIndex) == 0.0)
+						// xj = f && Y = 0
 						pf++;
 					else
+						// xj = f && Y = 1
 						nf++;
 				}
 			}
 			E0 = Df * ((double)y0 / subsetSize);
 			E1 = Df * ((double)y1 / subsetSize);
 
-			chiSquare += Math.pow((pf - E0), 2) / E0 + Math.pow((nf - E1), 2) / E1;
+			if (E0 != 0)
+				chiSquare += Math.pow((pf - E0), 2) / E0;
+			if (E1 != 0)
+				chiSquare += Math.pow((nf - E1), 2) / E1;
+			chiSquare += 0;
 		}
 		return chiSquare;
 	}
