@@ -50,11 +50,12 @@ public class DecisionTree implements Classifier {
 	public void buildClassifier(Instances instances) throws Exception {
 		classIndex = 9;
 		
-		// preProcessing
-		
 		buildTree(instances);
 		System.out.println("tree built:" + rules.size());
-		// postProcessing
+
+		if(m_pruningMode == PruningMode.Rule){
+			rulePrunning(instances);
+		}
 	}
 
 	private void buildTree(Instances instances) {
@@ -76,7 +77,7 @@ public class DecisionTree implements Classifier {
 			Node nodeToProcess = queue.poll();
 			if(nodeToProcess.isLeaf){
 				nodeToProcess.instances = null; // Free memory
-				
+
 				// Node is leaf => add rule
 				rules.add(nodeToProcess.nodeRule);
 				continue;
@@ -104,7 +105,14 @@ public class DecisionTree implements Classifier {
 				rules.add(nodeToProcess.nodeRule);
 				continue;
 			}
-			
+			// If chiSquare score is lower than 15.51, prune the branch and continue
+			// to the next element in the queue
+			if (m_pruningMode == PruningMode.Chi){
+				double chiSquare = calcChiSquare(nodeToProcess.instances, bestAttributeIndex);
+				if (chiSquare < 15.51)
+					continue;
+			}
+
 			// Create children
 			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex);
 			if(nodeToProcess != rootNode){
@@ -122,7 +130,7 @@ public class DecisionTree implements Classifier {
 		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = rootNode.instances.attribute(attributeIndex).numValues();
 		List<Node> children = new ArrayList<>();
 		for(int attributeValue = 0; attributeValue < NUMBER_OF_VALUES_FOR_ATTRIBUTE; attributeValue++){
-			
+
 			// Create new child
 			Node childNode = new Node();
 			childNode.parent = parent;
@@ -248,7 +256,7 @@ public class DecisionTree implements Classifier {
 		}
 		return true;
 	}
-	private double calcAvgError(Instances instances){
+	public double calcAvgError(Instances instances){
 		int errorCount = 0;
 		for (Instance instance : instances){
 			if (classifyInstance(instance) != instance.value(classIndex))

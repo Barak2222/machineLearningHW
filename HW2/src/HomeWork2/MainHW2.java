@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import HomeWork2.DecisionTree.PruningMode;
-import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 public class MainHW2 {
@@ -52,7 +51,7 @@ public class MainHW2 {
 		System.out.println("Decision Tree with No pruning");
 		System.out.println("The average train error of the decision tree is " + decisionTree.calcAvgError(trainingCancer));
 		System.out.println("The average test error of the decision tree is " + decisionTree.calcAvgError(testingCancer));
-		System.out.println("The amount of rules generated from the tree " + decisionTree.);
+		System.out.println("The amount of rules generated from the tree " + decisionTree.getRulesCount());
 		
 		decisionTree = new DecisionTree();
 		decisionTree.setPruningMode(PruningMode.Chi);
