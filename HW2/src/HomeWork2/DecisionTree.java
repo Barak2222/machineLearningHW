@@ -240,6 +240,14 @@ public class DecisionTree implements Classifier {
 		}
 		return true;
 	}
+	private double calcAvgError(Instances instances){
+		int errorCount = 0;
+		for (Instance instance : instances){
+			if (classifyInstance(instance) != instance.value(classIndex))
+				errorCount++;
+		}
+		return (double)errorCount / instances.size();
+	}
 
 	private double calcChiSquare(Instances instancesSubset, int attributeIndex){
 		int subsetSize = instancesSubset.size();
