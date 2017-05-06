@@ -1,6 +1,7 @@
 package HomeWork2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -9,8 +10,6 @@ import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.instance.RemoveWithValues;
 
 class BasicRule {
 	public BasicRule(){}
@@ -34,6 +33,7 @@ class Node {
 	double returnValue;
    	Rule nodeRule = new Rule();
    	boolean isPerfectlyClassified;
+   	Instances instances;
 }
 
 public class DecisionTree implements Classifier {
@@ -58,78 +58,96 @@ public class DecisionTree implements Classifier {
 	}
 
 	private void buildTree(Instances instances) {
+		
+		// Initialize queue
 		Queue<Node> queue = new LinkedBlockingQueue<>();
+		
+		// Create root
 		rootNode = new Node();
 		rootNode.isPerfectlyClassified = false;
+		Rule rootRule = new Rule();
+		rootRule.basicRule = new ArrayList<>();
+		rootNode.nodeRule = rootRule;
+		rootNode.instances = instances;
 		queue.add(rootNode);
+		
+		// Loop until queue is empty
 		while(queue.size() > 0){
 			Node nodeToProcess = queue.poll();
-			
-//			ArrayList<Instance> instancesForNode = new ArrayList<Instance>();
-//			for(int i = 0; i < instances.size(); i++){
-//				Instance currentInstance = instances.get(i);
-//				if(isRuleApplied(nodeToProcess.nodeRule, currentInstance)){
-//					instancesForNode.add(currentInstance);
-//				}
-//			}
-			
-			// if perfectly calssified
 			if(nodeToProcess.isPerfectlyClassified){
+				
+				// Free memory
+				nodeToProcess.instances = null;
 				continue;
 			}
-			Instances instancesThatGoToNode = instances;// TODO change this
+			Instances instancesThatGoToNode = nodeToProcess.instances;
 			
 			// Choose best attribute
 			int bestAttributeIndex = -1;
 			double bestInfoGain = -1;
 			for(int i = 0; i < instances.numAttributes() - 1; i++){
 				double currentInfoGain = calcInfoGain(instancesThatGoToNode, i);
-				if(currentInfoGain > bestAttributeIndex){
+				if(currentInfoGain > bestInfoGain){
 					bestInfoGain = currentInfoGain;
 					bestAttributeIndex = i;
 				}
 			}
 			
 			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex, instancesThatGoToNode);
-			// create children
-			
-			
+			queue.addAll(Arrays.asList(nodeToProcess.children));
 		}
 		// TODO Auto-generated method stub
 		
 	}
 	
-	private Node[] buildChildren(Node parent, int attributeIndex, Instances instances) {
+	private Node[] buildChildren(Node parent, int attributeIndex, Instances instancesThatGoToParent) {
 		parent.attributeIndex = attributeIndex;
 		List<BasicRule> listOfParentsRules = parent.nodeRule.basicRule;
 		
 		// eg number of children
-		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = instances.attribute(attributeIndex).numValues();
+		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = instancesThatGoToParent.attribute(attributeIndex).numValues();
 		Node[] children = new Node[NUMBER_OF_VALUES_FOR_ATTRIBUTE];
-		for(int i = 0; i < NUMBER_OF_VALUES_FOR_ATTRIBUTE; i++){
-			Node node = new Node();
+		for(int attributeValue = 0; attributeValue < NUMBER_OF_VALUES_FOR_ATTRIBUTE; attributeValue++){
+			
+			// Create new child
+			Node childNode = new Node();
+			childNode.parent = parent;
+			childNode.instances = filterInstancesWithAttributeValue(instancesThatGoToParent, attributeIndex, attributeValue);
+			
+			// Create relevant rule
 			Rule rule = new Rule();
-			node.parent = parent;
-			
 			List<BasicRule> listOfChildRules = new ArrayList<>(listOfParentsRules);
-			listOfChildRules.add(new BasicRule(attributeIndex, i));
+			listOfChildRules.add(new BasicRule(attributeIndex, attributeValue));
 			rule.basicRule = listOfChildRules;
-			node.nodeRule = rule;
+			childNode.nodeRule = rule;
 			
-			Double perfectlyClassifiedValue = isPerfectlyClassified(instances, rule);
+			// Check if node is leaf
+			Double perfectlyClassifiedValue = isPerfectlyClassified(instancesThatGoToParent, rule);
 			if(perfectlyClassifiedValue != null){
 				rule.returnValue = perfectlyClassifiedValue;
-				node.isPerfectlyClassified = true;
+				childNode.isPerfectlyClassified = true;
 			}
-			children[i] = node;
+			children[attributeValue] = childNode;
 		}
-		
 		return children;
 	}
 
+	// true   =>    returns class value
+	// false  =>    returns null
 	private Double isPerfectlyClassified(Instances instances, Rule r) {
-		// TODO Auto-generated method stub
-		return null;
+		double expectedValue = -1;
+		for (Instance instance : instances) {
+			if(isRuleApplied(r, instance)){
+				if(expectedValue == -1){
+					expectedValue = instance.value(classIndex);
+				} else {
+					if(expectedValue != instance.value(classIndex)){
+						return null;
+					}
+				}
+			}
+		}
+		return expectedValue;
 	}
 
 	private double calcInfoGain(Instances subsetOfTrainingData, int attributeIndex){
@@ -173,26 +191,21 @@ public class DecisionTree implements Classifier {
 		return calcEntropy(numberOfInstancesForClass);
 	}
 	
-//	private static Instances fildterInstancesWithAttributeValue(Instances instances, int attributeIndex, double attributevalue){
-//		try {
-//			RemoveWithValues filter = new RemoveWithValues();
-//			String[] options = new String[4];
-//			options[0] = "-C";   // Choose attribute to be used for selection
-//			options[1] = Integer.toString(attributeIndex); // Attribute number    
-//			options[2] = "-L";
-//			options[3] = Integer.toString((int) attributevalue);
-//			filter.setOptions(options);
-//			filter.setInputFormat(instances);
-//			return Filter.useFilter(instances, filter);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		throw new IllegalArgumentException();
-//	}
-//	
+
+	private static Instances filterInstancesThatApplyToRule(Instances source, Rule rule){
+		Instances clone = new Instances(source);
+		for (int i = source.numInstances() - 1; i >= 0; i--) {
+			Instance instance = clone.get(i);
+			if(! isRuleApplied(rule, instance)){
+				clone.delete(i);
+			}
+		}
+		return clone;
+	}
+	
 	private static Instances filterInstancesWithAttributeValue(Instances source, int attributeIndex, double attributeValue){
 		Instances clone = new Instances(source);
-		for (int i = clone.numInstances() - 1; i >= 0; i--) {
+		for (int i = source.numInstances() - 1; i >= 0; i--) {
 			Instance instance = clone.get(i);
 			double attrValueForInstance = instance.value(attributeIndex);
 			if( attrValueForInstance != attributeValue){
@@ -211,9 +224,14 @@ public class DecisionTree implements Classifier {
 		return (-1) * sum;
 	}
 	
-	private boolean isRuleApplied(Rule rule, Instance instance){
-		
-		return false;
+	private static boolean isRuleApplied(Rule rule, Instance instance){
+		List<BasicRule> logicList = rule.basicRule;
+		for (BasicRule basicRule : logicList) {
+			if(instance.value(basicRule.attributeIndex) != basicRule.attributeValue){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void setPruningMode(PruningMode pruningMode) {
