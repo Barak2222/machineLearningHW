@@ -34,7 +34,7 @@ class Node {
 	int attributeIndex;
 	double returnValue;
    	Rule nodeRule = new Rule();
-   	boolean isPerfectlyClassified;
+   	boolean isLeaf;
    	Instances instances;
 }
 
@@ -53,7 +53,7 @@ public class DecisionTree implements Classifier {
 		// preProcessing
 		
 		buildTree(instances);
-		System.out.println("tree built");
+		System.out.println("tree built:" + rules.size());
 		// postProcessing
 	}
 
@@ -64,7 +64,7 @@ public class DecisionTree implements Classifier {
 		
 		// Create root
 		rootNode = new Node();
-		rootNode.isPerfectlyClassified = false;
+		rootNode.isLeaf = false;
 		Rule rootRule = new Rule();
 		rootRule.basicRule = new ArrayList<>();
 		rootNode.nodeRule = rootRule;
@@ -74,7 +74,7 @@ public class DecisionTree implements Classifier {
 		// Loop until queue is empty
 		while(queue.size() > 0){
 			Node nodeToProcess = queue.poll();
-			if(nodeToProcess.isPerfectlyClassified){
+			if(nodeToProcess.isLeaf){
 				nodeToProcess.instances = null; // Free memory
 				
 				// Node is leaf => add rule
@@ -93,11 +93,19 @@ public class DecisionTree implements Classifier {
 				}
 			}
 			
-			// Case that node could not be further splitted (2 instances with same x and different class
+			// Case that 2 or more instances with same attribute values and different class
 			if(bestAttributeIndex == -1){
-				nodeToProcess.instances = null; // Free memory
+				nodeToProcess.isLeaf = true;
+				int[] countMajorityOfClasses = new int[2];
+				for (Instance instance : nodeToProcess.instances) {
+					countMajorityOfClasses[(int) instance.value(classIndex)]++;
+				}
+				nodeToProcess.nodeRule.returnValue = countMajorityOfClasses[0] > countMajorityOfClasses[1] ? 0.0 : 1.0;
+				rules.add(nodeToProcess.nodeRule);
 				continue;
 			}
+			
+			// Create children
 			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex);
 			if(nodeToProcess != rootNode){
 				nodeToProcess.instances = null; // Free memory
@@ -132,8 +140,8 @@ public class DecisionTree implements Classifier {
 			
 			// Check if node is a leaf
 			Double perfectlyClassifiedValue = isPerfectlyClassified(childNode.instances);
-			childNode.isPerfectlyClassified = perfectlyClassifiedValue != null;
-			if(childNode.isPerfectlyClassified){
+			childNode.isLeaf = perfectlyClassifiedValue != null;
+			if(childNode.isLeaf){
 				rule.returnValue = perfectlyClassifiedValue;
 			}
 			children.add(childNode);
@@ -226,7 +234,7 @@ public class DecisionTree implements Classifier {
 		double sum = 0;
 		for (double d : probabilities) {
 			if (d != 0)
-				sum+= d * Math.log(d);
+				sum+= d * Math.log10(d);
 		}
 		return (-1) * sum;
 	}
@@ -378,6 +386,10 @@ public class DecisionTree implements Classifier {
 		}
 		return count;
 	}
+    
+    public int getRulesCount(){
+    	return rules.size();
+    }
 
 	@Override
 	public double[] distributionForInstance(Instance arg0) throws Exception {
