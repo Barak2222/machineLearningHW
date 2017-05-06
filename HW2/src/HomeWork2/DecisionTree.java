@@ -111,10 +111,8 @@ public class DecisionTree implements Classifier {
 			sumOfChildEntropies += entropyForCurrent * instancesWithValue.size() / S_SIZE;
 			
 			// Aggregate data for splitInformation
-			childrenProbabilities[attributevalue] = instancesWithValue.size() / S_SIZE;
+			childrenProbabilities[attributevalue] = (double) instancesWithValue.size() / S_SIZE;
 		}
-		System.out.println();
-		
 		// Calculate informationGain
 		double informationGain = entropyForS - sumOfChildEntropies;
 		
@@ -124,6 +122,8 @@ public class DecisionTree implements Classifier {
 	}
 	
 	private double calcEntropyForInstances(Instances instances){
+		if (instances.size() == 0)
+			return 0.0;
 		double[] numberOfInstancesForClass = new double[2];
 		for (Instance instance : instances) {
 			numberOfInstancesForClass[(int) instance.value(classIndex)] ++;
@@ -151,12 +151,12 @@ public class DecisionTree implements Classifier {
 //		throw new IllegalArgumentException();
 //	}
 //	
-	private static Instances filterInstancesWithAttributeValue(Instances source, int attributeIndex, double attributevalue){
+	private static Instances filterInstancesWithAttributeValue(Instances source, int attributeIndex, double attributeValue){
 		Instances clone = new Instances(source);
-		for (int i = source.size() - 1; i >= 0; i--) {
-			Instance instance = source.get(i);
+		for (int i = clone.numInstances() - 1; i >= 0; i--) {
+			Instance instance = clone.get(i);
 			double attrValueForInstance = instance.value(attributeIndex);
-			if( attrValueForInstance != attributevalue){
+			if( attrValueForInstance != attributeValue){
 				clone.delete(i);
 			}
 		}
@@ -166,7 +166,8 @@ public class DecisionTree implements Classifier {
 	private double calcEntropy(double[] probabilities){
 		double sum = 0;
 		for (double d : probabilities) {
-			sum+= d * Math.log(d);
+			if (d != 0)
+				sum+= d * Math.log(d);
 		}
 		return (-1) * sum;
 	}
