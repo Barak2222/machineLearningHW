@@ -249,6 +249,32 @@ public class DecisionTree implements Classifier {
 		return (double)errorCount / instances.size();
 	}
 
+	private void rulePrunning(Instances instances){
+		boolean continuePrunning = true;
+		double curError;
+		double maxError;
+		Rule ruleToRemove;
+		while (continuePrunning){
+			List<Rule> clonedRules = new ArrayList<>(rules);
+			maxError = calcAvgError(instances);
+			ruleToRemove = null;
+			for(Rule rule: clonedRules){
+
+				rules.remove(rule);
+				curError = calcAvgError(instances);
+				if (curError < maxError && curError > 0){
+					maxError = curError;
+					ruleToRemove = rule;
+				}
+				rules.add(rule);
+			}
+			if (ruleToRemove != null)
+				rules.remove(ruleToRemove);
+			else
+				continuePrunning = false;
+		}
+	}
+
 	private double calcChiSquare(Instances instancesSubset, int attributeIndex){
 		int subsetSize = instancesSubset.size();
 		int numOfVals = instancesSubset.attribute(attributeIndex).numValues();
