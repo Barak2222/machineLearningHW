@@ -85,6 +85,7 @@ public class DecisionTree implements Classifier {
 				}
 			}
 			
+			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex, instancesThatGoToNode);
 			// create children
 			
 			
@@ -93,6 +94,28 @@ public class DecisionTree implements Classifier {
 		
 	}
 	
+	private Node[] buildChildren(Node parent, int attributeIndex, Instances instances) {
+		parent.attributeIndex = attributeIndex;
+		List<BasicRule> listOfParentsRules = parent.nodeRule.basicRule;
+		
+		// eg number of children
+		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = instances.attribute(attributeIndex).numValues();
+		Node[] children = new Node[NUMBER_OF_VALUES_FOR_ATTRIBUTE];
+		for(int i = 0; i < NUMBER_OF_VALUES_FOR_ATTRIBUTE; i++){
+			Node n = new Node();
+			n.parent = parent;
+			
+			Rule r = new Rule();
+			List<BasicRule> listOfChildRules = new ArrayList<>(listOfParentsRules);
+			children[i] = n;
+		}
+		
+		// check if child is perfectly classified
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	private double calcInfoGain(Instances subsetOfTrainingData, int attributeIndex){
 		final int S_SIZE = subsetOfTrainingData.size();
 		
@@ -113,7 +136,6 @@ public class DecisionTree implements Classifier {
 			// Aggregate data for splitInformation
 			childrenProbabilities[attributevalue] = instancesWithValue.size() / S_SIZE;
 		}
-		System.out.println();
 		
 		// Calculate informationGain
 		double informationGain = entropyForS - sumOfChildEntropies;
