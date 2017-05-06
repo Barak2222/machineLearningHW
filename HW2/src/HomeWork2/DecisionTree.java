@@ -234,6 +234,35 @@ public class DecisionTree implements Classifier {
 		return true;
 	}
 
+	private static double calcChiSquare(Instances instancesSubset, int attributeIndex){
+		int subsetSize = instancesSubset.size();
+		int numOfVals = instancesSubset.attribute(attributeIndex).numValues();
+		double chiSquare = 0;
+		int pf = 0, nf = 0, Df = 0, y0 = 0, y1 = 1;
+		double E0, E1;
+
+		for(int attrValue = 0; attrValue < numOfVals; attrValue++){
+			for (Instance instance : instancesSubset){
+				if (instance.value(classIndex) == 0.0)
+					y0++;
+				else
+					y1++;
+				if (instance.value(attributeIndex) == (double)attrValue){
+					Df++;
+					if (instance.value(classIndex) == 0.0)
+						pf++;
+					else
+						nf++;
+				}
+			}
+			E0 = Df * ((double)y0 / subsetSize);
+			E1 = Df * ((double)y1 / subsetSize);
+
+			chiSquare += Math.pow((pf - E0), 2) / E0 + Math.pow((nf - E1), 2) / E1;
+		}
+		return chiSquare;
+	}
+
 	public void setPruningMode(PruningMode pruningMode) {
 		m_pruningMode = pruningMode;
 	}
