@@ -241,22 +241,27 @@ public class DecisionTree implements Classifier {
 		return true;
 	}
 
-	private static double calcChiSquare(Instances instancesSubset, int attributeIndex){
+	private double calcChiSquare(Instances instancesSubset, int attributeIndex){
 		int subsetSize = instancesSubset.size();
 		int numOfVals = instancesSubset.attribute(attributeIndex).numValues();
 		double chiSquare = 0;
-		int pf = 0, nf = 0, Df = 0, y0 = 0, y1 = 1;
+		int pf, nf, Df;
+		int y0 = 0, y1 = 0;
 		double E0, E1;
 
+		// Count instances by class value
+		for (Instance instance : instancesSubset)
+			if (instance.value(classIndex) == 0.0)
+				y0++;
+			else
+				y1++;
+
 		for(int attrValue = 0; attrValue < numOfVals; attrValue++){
-			for (Instance instance : instancesSubset){
-				if (instance.value(classIndex) == 0.0)
-					y0++;
-				else
-					y1++;
-				if (instance.value(attributeIndex) == (double)attrValue){
+			pf = 0; nf = 0; Df = 0;
+			for (Instance instance1 : instancesSubset){
+				if (instance1.value(attributeIndex) == (double)attrValue){
 					Df++;
-					if (instance.value(classIndex) == 0.0)
+					if (instance1.value(classIndex) == 0.0)
 						pf++;
 					else
 						nf++;
