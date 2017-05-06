@@ -13,6 +13,11 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.instance.RemoveWithValues;
 
 class BasicRule {
+	public BasicRule(){}
+	public BasicRule(int attrIdx, int attrVal){
+		attributeIndex = attrIdx;
+		attributeValue = attrVal;
+	}
     int attributeIndex;
 	int attributeValue;
 }
@@ -102,16 +107,27 @@ public class DecisionTree implements Classifier {
 		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = instances.attribute(attributeIndex).numValues();
 		Node[] children = new Node[NUMBER_OF_VALUES_FOR_ATTRIBUTE];
 		for(int i = 0; i < NUMBER_OF_VALUES_FOR_ATTRIBUTE; i++){
-			Node n = new Node();
-			n.parent = parent;
+			Node node = new Node();
+			Rule rule = new Rule();
+			node.parent = parent;
 			
-			Rule r = new Rule();
 			List<BasicRule> listOfChildRules = new ArrayList<>(listOfParentsRules);
-			children[i] = n;
+			listOfChildRules.add(new BasicRule(attributeIndex, i));
+			rule.basicRule = listOfChildRules;
+			node.nodeRule = rule;
+			
+			Double perfectlyClassifiedValue = isPerfectlyClassified(instances, rule);
+			if(perfectlyClassifiedValue != null){
+				rule.returnValue = perfectlyClassifiedValue;
+				node.isPerfectlyClassified = true;
+			}
+			children[i] = node;
 		}
 		
-		// check if child is perfectly classified
-		
+		return children;
+	}
+
+	private Double isPerfectlyClassified(Instances instances, Rule r) {
 		// TODO Auto-generated method stub
 		return null;
 	}
