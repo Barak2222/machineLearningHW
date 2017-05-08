@@ -261,19 +261,17 @@ public class DecisionTree implements Classifier {
 
 	private void rulePrunning(Instances instances){
 		boolean continuePrunning = true;
-		double curError;
-		double maxError;
-		Rule ruleToRemove;
 		while (continuePrunning){
+			double errorBeforeRemoval = calcAvgError(validationSet);
+			Rule ruleToRemove = null;
+			double bestImprovement = -1;
 			List<Rule> clonedRules = new ArrayList<>(rules);
-			maxError = calcAvgError(instances);
-			ruleToRemove = null;
 			for(Rule rule: clonedRules){
-
 				rules.remove(rule);
-				curError = calcAvgError(instances);
-				if (curError < maxError && curError > 0){
-					maxError = curError;
+				double curError = calcAvgError(validationSet);
+				double errorImprovement = errorBeforeRemoval - curError;
+				if (errorImprovement > 0 && errorImprovement > bestImprovement){
+					bestImprovement = errorImprovement;
 					ruleToRemove = rule;
 				}
 				rules.add(rule);

@@ -62,6 +62,7 @@ public class MainHW2 {
 		System.out.println("The amount of rules generated from the tree " + decisionTree.getRulesCount());
 		
 		decisionTree = new DecisionTree();
+		decisionTree.validationSet = validationCancer;
 		decisionTree.setPruningMode(PruningMode.Rule);
 		decisionTree.buildClassifier(trainingCancer);
 		System.out.println("Decision Tree with Rule pruning");
