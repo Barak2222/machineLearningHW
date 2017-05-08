@@ -43,7 +43,8 @@ public class DecisionTree implements Classifier {
    	Instances validationSet;
    	private List<Rule> rules = new ArrayList<Rule>();
    	private int classIndex;
-   	
+	private static final double CHI_SQUARE_MIN_SCORE = 15.51;
+
 	@Override
 	public void buildClassifier(Instances instances) throws Exception {
 		classIndex = 9;
@@ -75,7 +76,6 @@ public class DecisionTree implements Classifier {
 			Node nodeToProcess = queue.poll();
 			if(nodeToProcess.isLeaf){
 				nodeToProcess.instances = null; // Free memory
-
 				// Node is leaf => add rule
 				rules.add(nodeToProcess.nodeRule);
 				continue;
@@ -94,23 +94,18 @@ public class DecisionTree implements Classifier {
 			
 			// Case that 2 or more instances with same attribute values and different class
 			if(bestAttributeIndex == -1){
-				nodeToProcess.isLeaf = true;
-				int[] countMajorityOfClasses = new int[2];
-				for (Instance instance : nodeToProcess.instances) {
-					countMajorityOfClasses[(int) instance.value(classIndex)]++;
-				}
-				nodeToProcess.nodeRule.returnValue = countMajorityOfClasses[0] > countMajorityOfClasses[1] ? 0.0 : 1.0;
-				rules.add(nodeToProcess.nodeRule);
+				turnNodeToLeaf(nodeToProcess);
 				continue;
 			}
 			// If chiSquare score is lower than 15.51, prune the branch and continue
 			// to the next element in the queue
 			if (m_pruningMode == PruningMode.Chi){
-				double chiSquare = calcChiSquare(nodeToProcess.instances, bestAttributeIndex);
-				if (chiSquare < 15.51)
+				// Calculate chiSquare score and check if pruning is necessary
+				if (calcChiSquare(nodeToProcess.instances, bestAttributeIndex) < CHI_SQUARE_MIN_SCORE){
+					turnNodeToLeaf(nodeToProcess);
 					continue;
+				}
 			}
-
 			// Create children
 			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex);
 			if(nodeToProcess != rootNode){
@@ -118,6 +113,19 @@ public class DecisionTree implements Classifier {
 			}
 			queue.addAll(Arrays.asList(nodeToProcess.children));
 		}
+	}
+	// Turn node to leaf and add it to the list of rules
+	private void turnNodeToLeaf(Node node){
+		node.isLeaf = true;
+		node.nodeRule.returnValue = node.returnValue = countMajority(node);
+		rules.add(node.nodeRule);
+	}
+	private double countMajority(Node node){
+		int[] countMajorityOfClasses = new int[2];
+		for (Instance instance : node.instances) {
+			countMajorityOfClasses[(int) instance.value(classIndex)]++;
+		}
+		return countMajorityOfClasses[0] > countMajorityOfClasses[1] ? 0.0 : 1.0;
 	}
 	
 	private Node[] buildChildren(Node parent, int attributeIndex) {
