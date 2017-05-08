@@ -329,7 +329,6 @@ public class DecisionTree implements Classifier {
 				chiSquare += Math.pow((pf - E0), 2) / E0;
 			if (E1 != 0)
 				chiSquare += Math.pow((nf - E1), 2) / E1;
-			chiSquare += 0;
 		}
 		return chiSquare;
 	}
