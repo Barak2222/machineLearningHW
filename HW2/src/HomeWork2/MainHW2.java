@@ -45,9 +45,7 @@ public class MainHW2 {
 		DecisionTree decisionTree = new DecisionTree();
 		decisionTree.setPruningMode(PruningMode.None);
 		decisionTree.buildClassifier(trainingCancer);
-		
-		int x = 1;
-		
+
 		System.out.println("Decision Tree with No pruning");
 		System.out.println("The average train error of the decision tree is " + decisionTree.calcAvgError(trainingCancer));
 		System.out.println("The average test error of the decision tree is " + decisionTree.calcAvgError(testingCancer));

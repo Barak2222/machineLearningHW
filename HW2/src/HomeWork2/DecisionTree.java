@@ -47,11 +47,10 @@ public class DecisionTree implements Classifier {
 
 	@Override
 	public void buildClassifier(Instances instances) throws Exception {
-		classIndex = 9;
-		
+		classIndex = instances.classIndex();
 		buildTree(instances);
-		System.out.println("tree built:" + rules.size());
 
+		// Post processing - Rule pruning
 		if(m_pruningMode == PruningMode.Rule){
 			rulePrunning(instances);
 		}
