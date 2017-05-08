@@ -75,6 +75,7 @@ public class DecisionTree implements Classifier {
 			Node nodeToProcess = queue.poll();
 			if(nodeToProcess.isLeaf){
 				nodeToProcess.instances = null; // Free memory
+				
 				// Node is leaf => add rule
 				rules.add(nodeToProcess.nodeRule);
 				continue;
@@ -96,9 +97,11 @@ public class DecisionTree implements Classifier {
 				turnNodeToLeaf(nodeToProcess);
 				continue;
 			}
+			
 			// If chiSquare score is lower than 15.51, prune the branch and continue
 			// to the next element in the queue
 			if (m_pruningMode == PruningMode.Chi){
+				
 				// Calculate chiSquare score and check if pruning is necessary
 				if (calcChiSquare(nodeToProcess.instances, bestAttributeIndex) < CHI_SQUARE_MIN_SCORE){
 					turnNodeToLeaf(nodeToProcess);
@@ -107,18 +110,18 @@ public class DecisionTree implements Classifier {
 			}
 			// Create children
 			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex);
-			if(nodeToProcess != rootNode){
-				nodeToProcess.instances = null; // Free memory
-			}
+			nodeToProcess.instances = null; // Free memory
 			queue.addAll(Arrays.asList(nodeToProcess.children));
 		}
 	}
+	
 	// Turn node to leaf and add it to the list of rules
 	private void turnNodeToLeaf(Node node){
 		node.isLeaf = true;
 		node.nodeRule.returnValue = node.returnValue = countMajority(node);
 		rules.add(node.nodeRule);
 	}
+	
 	private double countMajority(Node node){
 		int[] countMajorityOfClasses = new int[2];
 		for (Instance instance : node.instances) {
@@ -132,9 +135,9 @@ public class DecisionTree implements Classifier {
 		List<BasicRule> listOfParentsRules = parent.nodeRule.basicRule;
 		
 		// eg number of children
-		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = rootNode.instances.attribute(attributeIndex).numValues();
+		int numberOfValuesForAttribute = parent.instances.attribute(attributeIndex).numValues();
 		List<Node> children = new ArrayList<>();
-		for(int attributeValue = 0; attributeValue < NUMBER_OF_VALUES_FOR_ATTRIBUTE; attributeValue++){
+		for(int attributeValue = 0; attributeValue < numberOfValuesForAttribute; attributeValue++){
 
 			// Create new child
 			Node childNode = new Node();
@@ -151,7 +154,9 @@ public class DecisionTree implements Classifier {
 			rule.basicRule = listOfChildRules;
 			childNode.nodeRule = rule;
 			
-			// Check if node is a leaf
+			// Check if node is a leaf, the function returns the class if it is perfectly classified
+			// In case of not perfect classification, the funciton returns null
+			// ("Double" supports a null value wheare "double" cannot be null) 
 			Double perfectlyClassifiedValue = isPerfectlyClassified(childNode.instances);
 			childNode.isLeaf = perfectlyClassifiedValue != null;
 			if(childNode.isLeaf){
@@ -160,6 +165,7 @@ public class DecisionTree implements Classifier {
 			children.add(childNode);
 		}
 		
+		// Return an array of child nodes with the correct number of children
 		Node[] result = new Node[children.size()];
 		return children.toArray(result);
 	}
@@ -187,20 +193,17 @@ public class DecisionTree implements Classifier {
 		double sumOfChildEntropies = 0;
 		
 		// eg number of children
-		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = subsetOfTrainingData.attribute(attributeIndex).numValues();
+		int numberOfValuesForAttribute = subsetOfTrainingData.attribute(attributeIndex).numValues();
 		
 		// Iterate children and sum into sumOfChildEntropies
-		for(int attributevalue = 0; attributevalue < NUMBER_OF_VALUES_FOR_ATTRIBUTE; attributevalue++){
+		for(int attributevalue = 0; attributevalue < numberOfValuesForAttribute; attributevalue++){
 			Instances instancesWithValue = filterInstancesWithAttributeValue(subsetOfTrainingData, attributeIndex, attributevalue);
 			double entropyForCurrent = calcEntropyForInstances(instancesWithValue);
 			sumOfChildEntropies += entropyForCurrent * instancesWithValue.size() / S_SIZE;
 		}
 		
-		// Calculate informationGain
-		double informationGain = entropyForS - sumOfChildEntropies;
-		
-		// Calculate "splitInformation"
-		return informationGain;
+		// return informationGain
+		return entropyForS - sumOfChildEntropies;
 	}
 	
 	private double calcEntropyForInstances(Instances instances){
@@ -215,20 +218,12 @@ public class DecisionTree implements Classifier {
 		}
 		return calcEntropy(numberOfInstancesForClass);
 	}
-
-	private static Instances filterInstancesThatApplyToRule(Instances source, Rule rule){
-		Instances clone = new Instances(source);
-		for (int i = source.numInstances() - 1; i >= 0; i--) {
-			Instance instance = clone.get(i);
-			if(! isRuleApplied(rule, instance)){
-				clone.delete(i);
-			}
-		}
-		return clone;
-	}
 	
+	// Returns a subset of instances that have the requested value for the given attribute
 	private static Instances filterInstancesWithAttributeValue(Instances source, int attributeIndex, double attributeValue){
 		Instances clone = new Instances(source);
+		
+		// Delete shifts the instances, so we need to iterate from the end to the beginning
 		for (int i = source.numInstances() - 1; i >= 0; i--) {
 			Instance instance = clone.get(i);
 			double attrValueForInstance = instance.value(attributeIndex);
@@ -238,7 +233,7 @@ public class DecisionTree implements Classifier {
 		}
 		return clone;
 	}
-	
+	// Calculate the entropy according to the probabilities
 	private double calcEntropy(double[] probabilities){
 		double sum = 0;
 		for (double d : probabilities) {
@@ -248,6 +243,7 @@ public class DecisionTree implements Classifier {
 		return (-1) * sum;
 	}
 	
+	// Checks if the instance fully matches the rule being tested
 	private static boolean isRuleApplied(Rule rule, Instance instance){
 		List<BasicRule> logicList = rule.basicRule;
 		for (BasicRule basicRule : logicList) {
@@ -257,6 +253,8 @@ public class DecisionTree implements Classifier {
 		}
 		return true;
 	}
+	
+	// Calculate the average error for a specific instance set 
 	public double calcAvgError(Instances instances){
 		int errorCount = 0;
 		for (Instance instance : instances){
@@ -266,12 +264,14 @@ public class DecisionTree implements Classifier {
 		return (double)errorCount / instances.size();
 	}
 
+	// Run post processing rule pruning
 	private void rulePrunning(Instances instances){
 		boolean continuePrunning = true;
 		while (continuePrunning){
 			double errorBeforeRemoval = calcAvgError(validationSet);
 			Rule ruleToRemove = null;
 			double bestImprovement = -1;
+			// User cloned list of rules as a temporary list before removing the rule
 			List<Rule> clonedRules = new ArrayList<>(rules);
 			for(Rule rule: clonedRules){
 				rules.remove(rule);
@@ -290,6 +290,7 @@ public class DecisionTree implements Classifier {
 		}
 	}
 
+	// Calculate the chiSquare score for specific instances and an attribute 
 	private double calcChiSquare(Instances instancesSubset, int attributeIndex){
 		int subsetSize = instancesSubset.size();
 		int numOfVals = instancesSubset.attribute(attributeIndex).numValues();
@@ -340,6 +341,7 @@ public class DecisionTree implements Classifier {
 		validationSet = validation;
 	}
     
+	// Classify instance according to final rules
     @Override
 	public double classifyInstance(Instance instance) {
     	
