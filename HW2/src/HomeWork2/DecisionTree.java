@@ -2,10 +2,8 @@ package HomeWork2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import weka.classifiers.Classifier;
@@ -88,7 +86,7 @@ public class DecisionTree implements Classifier {
 			double bestInfoGain = -1;
 			for(int i = 0; i < instances.numAttributes() - 1; i++){
 				double currentInfoGain = calcInfoGain(nodeToProcess.instances, i);
-				if(currentInfoGain > bestInfoGain){
+				if(currentInfoGain > 0 && currentInfoGain > bestInfoGain){
 					bestInfoGain = currentInfoGain;
 					bestAttributeIndex = i;
 				}
@@ -183,23 +181,19 @@ public class DecisionTree implements Classifier {
 		
 		// eg number of children
 		final int NUMBER_OF_VALUES_FOR_ATTRIBUTE = subsetOfTrainingData.attribute(attributeIndex).numValues();
-		double[] childrenProbabilities = new double[NUMBER_OF_VALUES_FOR_ATTRIBUTE];
 		
 		// Iterate children and sum into sumOfChildEntropies
 		for(int attributevalue = 0; attributevalue < NUMBER_OF_VALUES_FOR_ATTRIBUTE; attributevalue++){
 			Instances instancesWithValue = filterInstancesWithAttributeValue(subsetOfTrainingData, attributeIndex, attributevalue);
 			double entropyForCurrent = calcEntropyForInstances(instancesWithValue);
 			sumOfChildEntropies += entropyForCurrent * instancesWithValue.size() / S_SIZE;
-			
-			// Aggregate data for splitInformation
-			childrenProbabilities[attributevalue] = (double) instancesWithValue.size() / S_SIZE;
 		}
+		
 		// Calculate informationGain
 		double informationGain = entropyForS - sumOfChildEntropies;
 		
 		// Calculate "splitInformation"
-		double splitInformation = calcEntropy(childrenProbabilities);
-		return informationGain / splitInformation;
+		return informationGain;
 	}
 	
 	private double calcEntropyForInstances(Instances instances){
