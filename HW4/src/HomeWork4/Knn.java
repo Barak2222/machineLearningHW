@@ -2,15 +2,12 @@ package HomeWork4;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Random;
 
 import HomeWork4.Knn.HyperParameters.Majority;
-import HomeWork4.Knn.HyperParameters.LPDistanceOptions;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -45,6 +42,7 @@ public class Knn implements Classifier {
 				bestError = error;
 				bestHyperParameters = hyperParameters;
 			}
+			System.out.println(hyperParameters + " - error:" + error);
 		}
 		this.hyperParameters = bestHyperParameters;
 		return bestHyperParameters;
@@ -147,7 +145,7 @@ public class Knn implements Classifier {
 			training.clear();
 			validation.clear();
 			for(int i = 0; i < instances.size(); i++){
-				if(i / numOfFolds == foldNumber){
+				if(i % numOfFolds == foldNumber){
 					validation.add(instances.get(i));
 				} else {
 					training.add(instances.get(i));
@@ -158,9 +156,7 @@ public class Knn implements Classifier {
 			this.m_trainingInstances = training;
 			double error = calcAvgError(validation);
 			sumOfErrors+= error;
-			
 		}
-		
 		return sumOfErrors / numOfFolds;
 	}
 	
@@ -170,25 +166,22 @@ public class Knn implements Classifier {
 	 * @return k nearest neighbors and their distance from the given instance
 	 */
 	private Map<Instance, Double> findNearestNeighbors(Instance target){
-		Map<Instance, Double> result = new HashMap<>();
-		Comparator<Instance> distanceComparator = new Comparator<Instance>() {
-			@Override
-			public int compare(Instance o1, Instance o2) {
-				double d1 = distance(target, o1);
-				double d2 = distance(target, o2);
-				return Double.compare(d1, d2) * (-1);
-			}
-		};
-		
-		// Initialize priority queue of size K with the relevant comparision function
-		PriorityQueue<Instance> queue = new PriorityQueue<>(hyperParameters.k, distanceComparator);
+		Map<Instance, Double> distanceData = new HashMap<>();
 		for (Instance neighbor : m_trainingInstances) {
-			queue.add(neighbor);
+			distanceData.put(neighbor, distance(neighbor, target));
 		}
-		
-		// Process data
-		for (Instance closestNeighbor : queue) {
-			result.put(closestNeighbor, distance(closestNeighbor, target));
+		Map<Instance, Double> result = new HashMap<>();
+		for(int i = 0; i < hyperParameters.k; i++){
+			double min = Double.MAX_VALUE;
+			Instance bestInstance = null;
+			for (Instance instance : distanceData.keySet()) {
+				if(distanceData.get(instance) < min){
+					min = distanceData.get(instance);
+					bestInstance = instance;
+				}
+			}
+			result.put(bestInstance, min);
+			distanceData.remove(bestInstance);
 		}
 		return result;
 	}
@@ -258,8 +251,8 @@ public class Knn implements Classifier {
 			case one:      { return OnePDistance(a, b, 1); }
 			case two:      { return OnePDistance(a, b, 2); }
 			case three:    { return OnePDistance(a, b, 3); }
-			case infinity: { return OneInfinityDistance(a, b);}
-			default:       { throw new IllegalArgumentException();}
+			case infinity: { return OneInfinityDistance(a, b); }
+			default:       { throw new IllegalArgumentException(); }
 		}
 	}
 	
@@ -267,17 +260,17 @@ public class Knn implements Classifier {
 	 * 
 	 * @param a instance1
 	 * @param b instaqnce2
-	 * @param pDistance p parameter to use
+	 * @param p p parameter to use
 	 * @return the l-p distance between the two instances
 	 */
-	private double OnePDistance(Instance a, Instance b, int pDistance){
+	private double OnePDistance(Instance a, Instance b, int p){
 		double sum = 0;
-		for(int attr = 0; attr < a.numAttributes() - 1; attr++){
-//			sum+= TODO
+		boolean skipFirst = (a.attribute(0).name().equals("id"));
+		for(int attr = skipFirst ? 1 : 0; attr < a.numAttributes() - 1; attr++){
+			
+			sum+= Math.abs(Math.pow((a.value(attr) - b.value(attr)), p));
 		}
-		
-		
-		return Math.pow(sum, (1/pDistance));
+		return Math.pow(sum, (1.0 / p));
 	}
 	
 	/**
@@ -287,8 +280,15 @@ public class Knn implements Classifier {
 	 * @return the l-infinity distance between two instances
 	 */
 	private double OneInfinityDistance(Instance a, Instance b){
-		// TODO
-		return 0;
+		double max = -1;
+		boolean skipFirst = (a.attribute(0).name().equals("id"));
+		for(int attr = skipFirst ? 1 : 0; attr < a.numAttributes() - 1; attr++){
+			double diff = Math.abs(a.value(attr) - b.value(attr));
+			if(diff > max){
+				max = diff;
+			}
+		}
+		return max;
 	}
 	
 	private void shuffleInstances(Instances instances){
@@ -340,17 +340,8 @@ public class Knn implements Classifier {
 		}
 		
 		public String toString(){
-			return MessageFormat.format("k: {0}, 1-p Distance: {1}, Majority: {2}", this.k, this.lpDistance, this.k);
+			return MessageFormat.format("k: {0}, 1-p Distance: {1}, Majority: {2}", this.k, this.lpDistance, this.majority);
 		}
 	}
-	
-//	static class InstancesPriorityQueue{
-//		private PriorityQueue queue;
-//		private Instance target;
-//		public InstancesPriorityQueue(Instance target, int size){
-//			this.target = target;
-//			queue = new PriorityQueue<>(size, new Comparator<Instance>() {
-//			})
-//		}
-//	}
+
 }
