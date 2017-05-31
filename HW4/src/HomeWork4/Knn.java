@@ -248,10 +248,10 @@ public class Knn implements Classifier {
 	 */
 	private double distance(Instance a, Instance b){
 		switch(hyperParameters.lpDistance){
-			case one:      { return OnePDistance(a, b, 1); }
-			case two:      { return OnePDistance(a, b, 2); }
-			case three:    { return OnePDistance(a, b, 3); }
-			case infinity: { return OneInfinityDistance(a, b); }
+			case one:      { return lpDistance(a, b, 1); }
+			case two:      { return lpDistance(a, b, 2); }
+			case three:    { return lpDistance(a, b, 3); }
+			case infinity: { return lInfinityDistance(a, b); }
 			default:       { throw new IllegalArgumentException(); }
 		}
 	}
@@ -263,7 +263,7 @@ public class Knn implements Classifier {
 	 * @param p p parameter to use
 	 * @return the l-p distance between the two instances
 	 */
-	private double OnePDistance(Instance a, Instance b, int p){
+	private double lpDistance(Instance a, Instance b, int p){
 		double sum = 0;
 		boolean skipFirst = (a.attribute(0).name().equals("id"));
 		for(int attr = skipFirst ? 1 : 0; attr < a.numAttributes() - 1; attr++){
@@ -279,7 +279,7 @@ public class Knn implements Classifier {
 	 * @param b instance2
 	 * @return the l-infinity distance between two instances
 	 */
-	private double OneInfinityDistance(Instance a, Instance b){
+	private double lInfinityDistance(Instance a, Instance b){
 		double max = -1;
 		boolean skipFirst = (a.attribute(0).name().equals("id"));
 		for(int attr = skipFirst ? 1 : 0; attr < a.numAttributes() - 1; attr++){
@@ -305,13 +305,13 @@ public class Knn implements Classifier {
 
 	@Override
 	public double[] distributionForInstance(Instance arg0) throws Exception {
-		// TODO Auto-generated method stub
+		// Do nothing
 		return null;
 	}
 
 	@Override
 	public Capabilities getCapabilities() {
-		// TODO Auto-generated method stub
+		// Do nothing
 		return null;
 	}
 	
@@ -339,6 +339,7 @@ public class Knn implements Classifier {
 			return result;
 		}
 		
+		@Override
 		public String toString(){
 			return MessageFormat.format("k: {0}, 1-p Distance: {1}, Majority: {2}", this.k, this.lpDistance, this.majority);
 		}
