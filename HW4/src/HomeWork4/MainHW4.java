@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import HomeWork4.Knn.EditMode;
+import HomeWork4.Knn.HyperParameters;
 import weka.core.Instances;
 
 public class MainHW4 {
@@ -30,6 +31,14 @@ public class MainHW4 {
 	}
 
 	public static void main(String[] args) throws Exception {
+		Knn knn = new Knn();
+		HyperParameters hp = knn.findBestHyperParameters(loadData("glass.txt"));
+		System.out.println("[GLASS] Best Hyper Parameters: " + hp);
+		
+		knn = new Knn();
+		hp = knn.findBestHyperParameters(loadData("cancer.txt"));
+		System.out.println("[CANCER] Best Hyper Parameters: " + hp);
+		
         //TODO: complete the Main method
 	}
 
