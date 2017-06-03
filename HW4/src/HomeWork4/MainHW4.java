@@ -35,27 +35,53 @@ public class MainHW4 {
 		Instances glassInstances = loadData("glass.txt");
 		Instances cancerInstances = loadData("cancer.txt");
 		Knn knn = new Knn();
+		knn.setEditMode(EditMode.None);
+			
+        // ---- PHASE 1 ----
 		
 		// GLASS dta
 		double error = knn.findBestHyperParameters(glassInstances);
-		HyperParameters hp = knn.hyperParameters;
+		HyperParameters hpForGlass = knn.hyperParameters;
 		System.out.println(MessageFormat.format(
 				"Cross validation error with K = {0}, p = {1}, majority function = {2} for glass data is: {3}", 
-				hp.k, hp.lpDistance, hp.majority, error));
+				hpForGlass.k, hpForGlass.lpDistance, hpForGlass.majority, error));
 		
 		
 		// CANCER data
 		knn = new Knn();
 		error = knn.findBestHyperParameters(cancerInstances);
-		hp = knn.hyperParameters;
+		HyperParameters hpForCancer = knn.hyperParameters;
 		System.out.println(MessageFormat.format(
 				"Cross validation error with K = {0}, p = {1}, majority function = {2} for cancer data is: {3}", 
-				hp.k, hp.lpDistance, hp.majority, error));
+				hpForCancer.k, hpForCancer.lpDistance, hpForCancer.majority, error));
 		double[] precisioAndRecall = knn.calcConfusion(cancerInstances, 10);
 		System.out.println(MessageFormat.format("The average Precision for the cancer dataset is: {0}", precisioAndRecall[0]));
 		System.out.println(MessageFormat.format("The average Recall for the cancer dataset is: {0}", precisioAndRecall[1]));
 		
-        //TODO: complete the Main method
+        // ---- PHASE 2 ----
+		
+		knn.hyperParameters = hpForGlass;
+		int[] foldParametersToCheck = {3, 5, 10, 50, glassInstances.size()};
+		for (int numberOfFolds : foldParametersToCheck) {
+			System.out.println("----------------------------");
+			System.out.println(MessageFormat.format("Results for {0} folds:", numberOfFolds));
+			System.out.println("----------------------------");
+			
+			for (EditMode editMode : EditMode.values()) {
+				
+				// Run cross validation
+				knn.setEditMode(editMode);
+				error = knn.crossValidationError(glassInstances, numberOfFolds);
+				
+				// Print
+				long totalElapsedTimeInNanoseconds = knn.timeToClassifyInstancesInAllFolds;
+				long averageElapseTimeForEachFold = totalElapsedTimeInNanoseconds / numberOfFolds;
+				System.out.println(MessageFormat.format(
+						"Cross validation error of {0}-Edited knn on glass dataset is {1} and the average elapsed time is {2}",
+						editMode, error, averageElapseTimeForEachFold));
+				System.out.println(MessageFormat.format("The total elapsed time is: {0}", totalElapsedTimeInNanoseconds));
+				System.out.println(MessageFormat.format("The total number of instances used in the classification phase is: {0}", knn.trainingInstancesCount));				
+			}
+		}
 	}
-
 }
