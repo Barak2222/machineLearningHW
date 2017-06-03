@@ -79,6 +79,9 @@ public class Knn implements Classifier {
 	 */
 	@Override
 	public double classifyInstance(Instance instance) {
+		if(m_trainingInstances.size() < hyperParameters.k){
+			return -1;
+		}
 		Map<Instance, Double> neighbors = findNearestNeighbors(instance);
 		if(hyperParameters.majority == Majority.weighted){
 			return getWeightedClassVoteResult(neighbors);
@@ -91,7 +94,17 @@ public class Knn implements Classifier {
 	 * @param instances
 	 */
 	private void editedForward(Instances instances) {
-		//TODO: implement this method
+		m_trainingInstances = new Instances(instances);
+		m_trainingInstances.clear();
+		for (Instance instance : instances) {
+			double predictedClass = classifyInstance(instance);
+			double actualClass = instance.value(instance.classIndex());
+			
+			// If instance is misclassified, add it to T
+			if(predictedClass != actualClass){
+				m_trainingInstances.add(instance);
+			}
+		}
 	}
 
 	/**
@@ -99,7 +112,17 @@ public class Knn implements Classifier {
 	 * @param instances
 	 */
 	private void editedBackward(Instances instances) {
-		//TODO: implement this method
+		m_trainingInstances = new Instances(instances);
+		for (Instance instance : instances) {
+			m_trainingInstances.remove(instance);
+			double predictedClass = classifyInstance(instance);
+			double actualClass = instance.value(instance.classIndex());
+			
+			// If instance is misclassified, put it back in T
+			if(predictedClass != actualClass){
+				m_trainingInstances.add(instance);
+			}
+		}
 	}
 	
 	/**
