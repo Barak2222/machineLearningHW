@@ -1,0 +1,93 @@
+Cross validation erroCross validation error with K = 3, p = one, majority function = weighted for glass data is: 0.26
+Cross validation error with K = 13, p = one, majority function = weighted for cancer data is: 0.259
+The average Precision for the cancer dataset is: 0.598
+The average Recall for the cancer dataset is: 0.316
+----------------------------
+Results for 3 folds:
+----------------------------
+Cross validation error of None-Edited knn on glass dataset is 0.346 and the average elapsed time is 20,005,281
+The total elapsed time is: 60,015,843
+The total number of instances used in the classification phase is: 428
+Cross validation error of Forwards-Edited knn on glass dataset is 0.364 and the average elapsed time is 16,544,560
+The total elapsed time is: 49,633,681
+The total number of instances used in the classification phase is: 167
+Cross validation error of Backwards-Edited knn on glass dataset is 0.425 and the average elapsed time is 34,410,644
+The total elapsed time is: 103,231,934
+The total number of instances used in the classification phase is: 166
+----------------------------
+Results for 5 folds:
+----------------------------
+Cross validation error of None-Edited knn on glass dataset is 0.276 and the average elapsed time is 14,439,389
+The total elapsed time is: 72,196,947
+The total number of instances used in the classification phase is: 856
+Cross validation error of Forwards-Edited knn on glass dataset is 0.308 and the average elapsed time is 17,319,840
+The total elapsed time is: 86,599,200
+The total number of instances used in the classification phase is: 335
+Cross validation error of Backwards-Edited knn on glass dataset is 0.351 and the average elapsed time is 43,529,226
+The total elapsed time is: 217,646,131
+The total number of instances used in the classification phase is: 321
+----------------------------
+Results for 10 folds:
+----------------------------
+Cross validation error of None-Edited knn on glass dataset is 0.258 and the average elapsed time is 8,110,767
+The total elapsed time is: 81,107,673
+The total number of instances used in the classification phase is: 1,926
+Cross validation error of Forwards-Edited knn on glass dataset is 0.332 and the average elapsed time is 18,823,560
+The total elapsed time is: 188,235,601
+The total number of instances used in the classification phase is: 747
+Cross validation error of Backwards-Edited knn on glass dataset is 0.356 and the average elapsed time is 51,820,774
+The total elapsed time is: 518,207,740
+The total number of instances used in the classification phase is: 749
+----------------------------
+Results for 50 folds:
+----------------------------
+Cross validation error of None-Edited knn on glass dataset is 0.285 and the average elapsed time is 1,803,596
+The total elapsed time is: 90,179,819
+The total number of instances used in the classification phase is: 10,486
+Cross validation error of Forwards-Edited knn on glass dataset is 0.317 and the average elapsed time is 18,248,813
+The total elapsed time is: 912,440,681
+The total number of instances used in the classification phase is: 3,783
+Cross validation error of Backwards-Edited knn on glass dataset is 0.306 and the average elapsed time is 61,641,859
+The total elapsed time is: 3,082,092,985
+The total number of instances used in the classification phase is: 4,218
+----------------------------
+Results for 214 folds:
+----------------------------
+Cross validation error of None-Edited knn on glass dataset is 0.276 and the average elapsed time is 456,565
+The total elapsed time is: 97,704,951
+The total number of instances used in the classification phase is: 45,582
+Cross validation error of Forwards-Edited knn on glass dataset is 0.327 and the average elapsed time is 21,378,628
+The total elapsed time is: 4,575,026,453
+The total number of instances used in the classification phase is: 19,996
+Cross validation error of Backwards-Edited knn on glass dataset is 0.336 and the average elapsed time is 58,728,610
+The total elapsed time is: 12,567,922,597
+The total number of instances used in the classification phase is: 17,260
+
+
+---------------------------------
+-----------QUESITIONS------------
+---------------------------------
+1. In general, what is the influence of the number of folds on the running time?
+2. Is there a connection between your answer for the first question to the number of instances that used in the classification (the number that you printed)? If yes, what is the connection? If not, explain why not?
+
+---------------------------------
+-------------ANSWERS-------------
+---------------------------------
+1.
+Let k be the number of folds.
+As we can see in the output, when k grows, there are two changes:
+	(a) The total running time grows.
+	(b) The average running time for each fold decreases.
+Explanation for (a): when k grows we need more iterations(one for each fold) => More running time.
+Explanation for (b): when k grows each fold contains less instances in the validation set,
+So the average running time for the validation sets decreases.
+
+2.
+Yes, there is a connection.
+When k grows, each instance is used in the cross-validation-training-set for more folds(eg used in k-1 folds for "EditMode.none").
+So when k grows, instances are counted more times.
+Counting the same instance many times indicates that the instance appears in many folds, thus
+the distance to the instance is calculated many times => running time grows.
+To conclude: The "number of instances" in the output is positively correlated with the running time.
+
+
