@@ -1,6 +1,5 @@
 package HomeWork4;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,8 +149,8 @@ public class Knn implements Classifier {
 	public double[] calcConfusion(Instances instances, int numOfFolds) {
 		shuffleInstances(instances);
 		Instances dataToKeep = m_trainingInstances;
-		double precisionResult = 0.0;
-		double recallResult = 0.0;
+		double precisionSum = 0.0;
+		double recallSum = 0.0;
 		for(int foldNumber = 0; foldNumber < numOfFolds; foldNumber++){
 			
 			// Split to training and validation
@@ -182,10 +181,10 @@ public class Knn implements Classifier {
 				recall = 1;
 			
 			// Add to sum for the Weighted average calculation
-			precisionResult+= precision * validation.size() / instances.size();
-			recallResult+= recall * validation.size() / instances.size();
+			precisionSum+= precision;
+			recallSum+= recall;
 		}
-		double[] result = { precisionResult, recallResult };
+		double[] result = { precisionSum / numOfFolds, recallSum / numOfFolds };
 		m_trainingInstances = dataToKeep;
 		return result;
 	}
@@ -234,7 +233,7 @@ public class Knn implements Classifier {
 		shuffleInstances(instances);
 		trainingInstancesCount = 0;
 		long timeBefore = System.nanoTime();
-		double resultError = 0.0;
+		double sumOfErrors = 0.0;
 		for(int foldNumber = 0; foldNumber < numOfFolds; foldNumber++){
 			
 			// Split to training and validation
@@ -254,11 +253,11 @@ public class Knn implements Classifier {
 			buildClassifier(training);
 			trainingInstancesCount+= m_trainingInstances.size();
 			double error = calcAvgError(validation);
-			resultError+= error * validation.size() / instances.size();
+			sumOfErrors+= error;
 		}
 		timeToClassifyInstancesInAllFolds = System.nanoTime() - timeBefore;
 		m_trainingInstances = instances;
-		return resultError;
+		return sumOfErrors / numOfFolds;
 	}
 	
 	/**
