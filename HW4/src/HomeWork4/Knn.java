@@ -234,7 +234,7 @@ public class Knn implements Classifier {
 		shuffleInstances(instances);
 		trainingInstancesCount = 0;
 		long timeBefore = System.nanoTime();
-		double sumOfErrors = 0;
+		double resultError = 0.0;
 		for(int foldNumber = 0; foldNumber < numOfFolds; foldNumber++){
 			
 			// Split to training and validation
@@ -254,13 +254,11 @@ public class Knn implements Classifier {
 			buildClassifier(training);
 			trainingInstancesCount+= m_trainingInstances.size();
 			double error = calcAvgError(validation);
-			sumOfErrors+= error;
-			
-			// Update trainingInstancesCount
+			resultError+= error * validation.size() / instances.size();
 		}
 		timeToClassifyInstancesInAllFolds = System.nanoTime() - timeBefore;
 		m_trainingInstances = instances;
-		return sumOfErrors / numOfFolds;
+		return resultError;
 	}
 	
 	/**
@@ -419,7 +417,7 @@ public class Knn implements Classifier {
 	}
 	
 	public static class HyperParameters {
-		public enum Majority { uniform, weighted;}
+		public enum Majority { uniform, weighted; }
 		public enum LPDistanceOptions { one, two, three, infinity }
 		
 		public int k;
@@ -441,11 +439,5 @@ public class Knn implements Classifier {
 			}
 			return result;
 		}
-		
-		@Override
-		public String toString(){
-			return MessageFormat.format("k: {0}, 1-p Distance: {1}, Majority: {2}", this.k, this.lpDistance, this.majority);
-		}
 	}
-
 }
