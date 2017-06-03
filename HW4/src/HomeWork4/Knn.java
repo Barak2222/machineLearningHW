@@ -16,6 +16,7 @@ import weka.core.Instances;
 public class Knn implements Classifier {
 	
 	public enum EditMode {None, Forwards, Backwards};
+	public enum EvaluationTypes { tp, fp, tn, fn };
 	private EditMode m_editMode = EditMode.None;
 	private Instances m_trainingInstances;
 	private int numberOfClasses;
@@ -124,10 +125,72 @@ public class Knn implements Classifier {
 	 * @param instances instances
 	 * @return double array of size 2. First index for Precision and the second for Recall.
 	 */
-	private double[] calcConfusion(Instances instances) {
-		// TODO;
-		return null;
+	public double[] calcConfusion(Instances instances, int numOfFolds) {
+		shuffleInstances(instances);
+		Instances dataToKeep = m_trainingInstances;
+		double precisionSum = 0.0;
+		double recallSum = 0.0;
+		for(int foldNumber = 0; foldNumber < numOfFolds; foldNumber++){
+			
+			// Split to training and validation
+			Instances training = new Instances(instances);
+			Instances validation = new Instances(instances);
+			training.clear();
+			validation.clear();
+			for(int i = 0; i < instances.size(); i++){
+				if(i % numOfFolds == foldNumber){
+					validation.add(instances.get(i));
+				} else {
+					training.add(instances.get(i));
+				}
+			}
+			
+			// Calc precision and recall
+			this.m_trainingInstances = training;
+			Map<EvaluationTypes, Double> errorEvaluation = calcErrorEvaluation(validation);
+			precisionSum+= (errorEvaluation.get(EvaluationTypes.tp)) / 
+					(errorEvaluation.get(EvaluationTypes.tp) + errorEvaluation.get(EvaluationTypes.fp));
+			recallSum+= (errorEvaluation.get(EvaluationTypes.tp)) / 
+					(errorEvaluation.get(EvaluationTypes.tp) + errorEvaluation.get(EvaluationTypes.fn));
+		}
+		m_trainingInstances = dataToKeep;
+		double[] result = { precisionSum / numOfFolds, recallSum / numOfFolds }; 
+		return result;
 	}
+	
+	/**
+	 * Calculate EvaluationTypes (tp, fp, tn, fn) for a given instances
+	 * Class 0.0 = positive, Class 1.1 = negative
+	 * @param instances given instances
+	 * @return Map from EvaluationTypes to the double value
+	 */
+	private Map<EvaluationTypes, Double> calcErrorEvaluation(Instances instances){
+		Map<EvaluationTypes, Double> errorData = new HashMap<>();
+		errorData.put(EvaluationTypes.tp, 0.0);
+		errorData.put(EvaluationTypes.fp, 0.0);
+		errorData.put(EvaluationTypes.tn, 0.0);
+		errorData.put(EvaluationTypes.fn, 0.0);
+		for (Instance instance : instances) {
+			double predictedClass = classifyInstance(instance);
+			double actualClass = instance.value(instance.classIndex());
+			EvaluationTypes typeToIncrement = null;
+			
+			// Positive class
+			if(actualClass == 0.0){
+				typeToIncrement = (predictedClass == 0.0) ? EvaluationTypes.tp : EvaluationTypes.fp;
+			} else { // NegativeClass
+				typeToIncrement = (predictedClass == 1.0) ? EvaluationTypes.tn : EvaluationTypes.fn;
+			}
+			
+			// Increment count
+			errorData.put(typeToIncrement, errorData.get(typeToIncrement) + 1);
+		}
+		for (EvaluationTypes evaluationType : EvaluationTypes.values()) {
+			errorData.put(evaluationType, errorData.get(evaluationType) / instances.size());
+		}
+		return errorData;
+	}
+	
 
 	/**
 	 * Calculate the cross validation error = average error on all folds.
