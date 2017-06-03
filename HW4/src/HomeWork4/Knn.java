@@ -1,6 +1,5 @@
 package HomeWork4;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -170,13 +169,23 @@ public class Knn implements Classifier {
 			// Calc precision and recall
 			this.m_trainingInstances = training;
 			Map<EvaluationTypes, Double> errorEvaluation = calcErrorEvaluation(validation);
-			precisionSum+= (errorEvaluation.get(EvaluationTypes.tp)) / 
+			double precision = (errorEvaluation.get(EvaluationTypes.tp)) / 
 					(errorEvaluation.get(EvaluationTypes.tp) + errorEvaluation.get(EvaluationTypes.fp));
-			recallSum+= (errorEvaluation.get(EvaluationTypes.tp)) / 
+			double recall =  (errorEvaluation.get(EvaluationTypes.tp)) / 
 					(errorEvaluation.get(EvaluationTypes.tp) + errorEvaluation.get(EvaluationTypes.fn));
+
+			// In some corner cases we can get (0.0/0.0) => in those cases we use 1
+			if(Double.isNaN(precision))
+				precision = 1;
+			if(Double.isNaN(recall))
+				recall = 1;
+			
+			// Add to sum for the Weighted average calculation
+			precisionSum+= precision;
+			recallSum+= recall;
 		}
+		double[] result = { precisionSum / numOfFolds, recallSum / numOfFolds };
 		m_trainingInstances = dataToKeep;
-		double[] result = { precisionSum / numOfFolds, recallSum / numOfFolds }; 
 		return result;
 	}
 	
@@ -224,7 +233,7 @@ public class Knn implements Classifier {
 		shuffleInstances(instances);
 		trainingInstancesCount = 0;
 		long timeBefore = System.nanoTime();
-		double sumOfErrors = 0;
+		double sumOfErrors = 0.0;
 		for(int foldNumber = 0; foldNumber < numOfFolds; foldNumber++){
 			
 			// Split to training and validation
@@ -245,8 +254,6 @@ public class Knn implements Classifier {
 			trainingInstancesCount+= m_trainingInstances.size();
 			double error = calcAvgError(validation);
 			sumOfErrors+= error;
-			
-			// Update trainingInstancesCount
 		}
 		timeToClassifyInstancesInAllFolds = System.nanoTime() - timeBefore;
 		m_trainingInstances = instances;
@@ -409,7 +416,7 @@ public class Knn implements Classifier {
 	}
 	
 	public static class HyperParameters {
-		public enum Majority { uniform, weighted;}
+		public enum Majority { uniform, weighted; }
 		public enum LPDistanceOptions { one, two, three, infinity }
 		
 		public int k;
@@ -431,11 +438,5 @@ public class Knn implements Classifier {
 			}
 			return result;
 		}
-		
-		@Override
-		public String toString(){
-			return MessageFormat.format("k: {0}, 1-p Distance: {1}, Majority: {2}", this.k, this.lpDistance, this.majority);
-		}
 	}
-
 }
