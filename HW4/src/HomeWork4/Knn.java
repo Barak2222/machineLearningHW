@@ -150,8 +150,8 @@ public class Knn implements Classifier {
 	public double[] calcConfusion(Instances instances, int numOfFolds) {
 		shuffleInstances(instances);
 		Instances dataToKeep = m_trainingInstances;
-		double precisionSum = 0.0;
-		double recallSum = 0.0;
+		double precisionResult = 0.0;
+		double recallResult = 0.0;
 		for(int foldNumber = 0; foldNumber < numOfFolds; foldNumber++){
 			
 			// Split to training and validation
@@ -170,13 +170,23 @@ public class Knn implements Classifier {
 			// Calc precision and recall
 			this.m_trainingInstances = training;
 			Map<EvaluationTypes, Double> errorEvaluation = calcErrorEvaluation(validation);
-			precisionSum+= (errorEvaluation.get(EvaluationTypes.tp)) / 
+			double precision = (errorEvaluation.get(EvaluationTypes.tp)) / 
 					(errorEvaluation.get(EvaluationTypes.tp) + errorEvaluation.get(EvaluationTypes.fp));
-			recallSum+= (errorEvaluation.get(EvaluationTypes.tp)) / 
+			double recall =  (errorEvaluation.get(EvaluationTypes.tp)) / 
 					(errorEvaluation.get(EvaluationTypes.tp) + errorEvaluation.get(EvaluationTypes.fn));
+
+			// In some corner cases we can get (0.0/0.0) => in those cases we use 1
+			if(Double.isNaN(precision))
+				precision = 1;
+			if(Double.isNaN(recall))
+				recall = 1;
+			
+			// Add to sum for the Weighted average calculation
+			precisionResult+= precision * validation.size() / instances.size();
+			recallResult+= recall * validation.size() / instances.size();
 		}
+		double[] result = { precisionResult, recallResult };
 		m_trainingInstances = dataToKeep;
-		double[] result = { precisionSum / numOfFolds, recallSum / numOfFolds }; 
 		return result;
 	}
 	
