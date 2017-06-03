@@ -108,6 +108,7 @@ public class DecisionTree implements Classifier {
 					continue;
 				}
 			}
+			
 			// Create children
 			nodeToProcess.children = buildChildren(nodeToProcess, bestAttributeIndex);
 			nodeToProcess.instances = null; // Free memory
@@ -134,7 +135,7 @@ public class DecisionTree implements Classifier {
 		parent.attributeIndex = attributeIndex;
 		List<BasicRule> listOfParentsRules = parent.nodeRule.basicRule;
 		
-		// eg number of children
+		// eg max number of children
 		int numberOfValuesForAttribute = parent.instances.attribute(attributeIndex).numValues();
 		List<Node> children = new ArrayList<>();
 		for(int attributeValue = 0; attributeValue < numberOfValuesForAttribute; attributeValue++){
@@ -143,6 +144,8 @@ public class DecisionTree implements Classifier {
 			Node childNode = new Node();
 			childNode.parent = parent;
 			childNode.instances = filterInstancesWithAttributeValue(parent.instances, attributeIndex, attributeValue);
+			
+			// Do not create child if there are no relevant instances
 			if(childNode.instances.isEmpty()){
 				continue;
 			}
@@ -233,6 +236,7 @@ public class DecisionTree implements Classifier {
 		}
 		return clone;
 	}
+	
 	// Calculate the entropy according to the probabilities
 	private double calcEntropy(double[] probabilities){
 		double sum = 0;
@@ -271,7 +275,8 @@ public class DecisionTree implements Classifier {
 			double errorBeforeRemoval = calcAvgError(validationSet);
 			Rule ruleToRemove = null;
 			double bestImprovement = -1;
-			// User cloned list of rules as a temporary list before removing the rule
+			
+			// Use a cloned list of rules as temporary list. To ensure correct iteration
 			List<Rule> clonedRules = new ArrayList<>(rules);
 			for(Rule rule: clonedRules){
 				rules.remove(rule);
@@ -352,7 +357,7 @@ public class DecisionTree implements Classifier {
 			}
 		}
     	
-    	// Find rule with largest amout of consequitive conditions
+    	// Find rule with largest amount of consequitive conditions
     	int longestRuleChainSize = -1;
     	List<Rule> rulesWithLongestChain = new ArrayList<>();
     	
