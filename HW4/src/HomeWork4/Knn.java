@@ -112,14 +112,14 @@ public class Knn implements Classifier {
 	 */
 	private void editedBackward(Instances instances) {
 		m_trainingInstances = new Instances(instances);
-		for (Instance instance : instances) {
-			m_trainingInstances.remove(instance);
-			double predictedClass = classifyInstance(instance);
-			double actualClass = instance.value(instance.classIndex());
+		for (int i = m_trainingInstances.size() - 1; i >= 0; i--) {
+			Instance removedInstance = m_trainingInstances.remove(i);
+			double predictedClass = classifyInstance(removedInstance);
+			double actualClass = removedInstance.value(removedInstance.classIndex());
 			
 			// If instance is misclassified, put it back in T
 			if(predictedClass != actualClass){
-				m_trainingInstances.add(instance);
+				m_trainingInstances.add(removedInstance);
 			}
 		}
 	}
@@ -242,11 +242,11 @@ public class Knn implements Classifier {
 			
 			// Calc error
 			buildClassifier(training);
+			trainingInstancesCount+= m_trainingInstances.size();
 			double error = calcAvgError(validation);
 			sumOfErrors+= error;
 			
 			// Update trainingInstancesCount
-			trainingInstancesCount+= training.size();
 		}
 		timeToClassifyInstancesInAllFolds = System.nanoTime() - timeBefore;
 		m_trainingInstances = instances;
