@@ -197,11 +197,11 @@ public class Knn implements Classifier {
 			double actualClass = instance.value(instance.classIndex());
 			EvaluationTypes typeToIncrement = null;
 			
-			// Positive class
-			if(actualClass == 0.0){
-				typeToIncrement = (predictedClass == 0.0) ? EvaluationTypes.tp : EvaluationTypes.fp;
-			} else { // NegativeClass
-				typeToIncrement = (predictedClass == 1.0) ? EvaluationTypes.tn : EvaluationTypes.fn;
+			// Predicted positive
+			if(predictedClass == 0.0){
+				typeToIncrement = (actualClass == 0.0) ? EvaluationTypes.tp : EvaluationTypes.fp;
+			} else { // Predicted negative
+				typeToIncrement = (actualClass == 1.0) ? EvaluationTypes.tn : EvaluationTypes.fn;
 			}
 			
 			// Increment count
