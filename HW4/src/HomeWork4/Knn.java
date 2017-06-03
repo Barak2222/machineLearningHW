@@ -21,6 +21,8 @@ public class Knn implements Classifier {
 	private Instances m_trainingInstances;
 	private int numberOfClasses;
 	public HyperParameters hyperParameters;
+	public int trainingInstancesCount = 0;
+	public long timeToClassifyInstancesInAllFolds;
 
 	public EditMode getEditMode() {
 		return m_editMode;
@@ -30,8 +32,7 @@ public class Knn implements Classifier {
 		m_editMode = editMode;
 	}
 	
-	public double findBestHyperParameters(Instances instances){
-		shuffleInstances(instances);
+	public double findBestHyperParameters(Instances instances) throws Exception{
 		numberOfClasses = instances.attribute(instances.classIndex()).numValues();
 		List<HyperParameters> options  = HyperParameters.getHyperParametersPermutations();
 		double bestError = Double.MAX_VALUE;
@@ -53,7 +54,6 @@ public class Knn implements Classifier {
 	 */
 	@Override
 	public void buildClassifier(Instances arg0) throws Exception {
-		shuffleInstances(arg0);
 		numberOfClasses = arg0.attribute(arg0.classIndex()).numValues();
 		switch (m_editMode) {
 		case None:
@@ -220,7 +220,10 @@ public class Knn implements Classifier {
 	 * @param numOfFolds number of folds
 	 * @return Average fold error (double)
 	 */
-	private double crossValidationError(Instances instances, int numOfFolds) {
+	public double crossValidationError(Instances instances, int numOfFolds) throws Exception{
+		shuffleInstances(instances);
+		trainingInstancesCount = 0;
+		long timeBefore = System.nanoTime();
 		double sumOfErrors = 0;
 		for(int foldNumber = 0; foldNumber < numOfFolds; foldNumber++){
 			
@@ -238,10 +241,15 @@ public class Knn implements Classifier {
 			}
 			
 			// Calc error
-			this.m_trainingInstances = training;
+			buildClassifier(training);
 			double error = calcAvgError(validation);
 			sumOfErrors+= error;
+			
+			// Update trainingInstancesCount
+			trainingInstancesCount+= training.size();
 		}
+		timeToClassifyInstancesInAllFolds = System.nanoTime() - timeBefore;
+		m_trainingInstances = instances;
 		return sumOfErrors / numOfFolds;
 	}
 	
