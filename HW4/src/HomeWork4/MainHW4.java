@@ -34,17 +34,26 @@ public class MainHW4 {
 	public static void main(String[] args) throws Exception {
 		Instances glassInstances = loadData("glass.txt");
 		Instances cancerInstances = loadData("cancer.txt");
-		
-		
 		Knn knn = new Knn();
-		HyperParameters hp = knn.findBestHyperParameters(glassInstances);
-		System.out.println("[GLASS] Best Hyper Parameters: " + hp);
 		
+		// GLASS dta
+		double error = knn.findBestHyperParameters(glassInstances);
+		HyperParameters hp = knn.hyperParameters;
+		System.out.println(MessageFormat.format(
+				"Cross validation error with K = {0}, p = {1}, majority function = {2} for glass data is: {3}", 
+				hp.k, hp.lpDistance, hp.majority, error));
+		
+		
+		// CANCER data
 		knn = new Knn();
-		hp = knn.findBestHyperParameters(cancerInstances);
-		System.out.println("[CANCER] Best Hyper Parameters: " + hp);
+		error = knn.findBestHyperParameters(cancerInstances);
+		hp = knn.hyperParameters;
+		System.out.println(MessageFormat.format(
+				"Cross validation error with K = {0}, p = {1}, majority function = {2} for cancer data is: {3}", 
+				hp.k, hp.lpDistance, hp.majority, error));
 		double[] precisioAndRecall = knn.calcConfusion(cancerInstances, 10);
-		System.out.println(MessageFormat.format("[CANCER] precision {0} recall {1}", precisioAndRecall[0], precisioAndRecall[1]));
+		System.out.println(MessageFormat.format("The average Precision for the cancer dataset is: {0}", precisioAndRecall[0]));
+		System.out.println(MessageFormat.format("The average Recall for the cancer dataset is: {0}", precisioAndRecall[1]));
 		
         //TODO: complete the Main method
 	}

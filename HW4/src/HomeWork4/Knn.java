@@ -30,7 +30,7 @@ public class Knn implements Classifier {
 		m_editMode = editMode;
 	}
 	
-	public HyperParameters findBestHyperParameters(Instances instances){
+	public double findBestHyperParameters(Instances instances){
 		shuffleInstances(instances);
 		numberOfClasses = instances.attribute(instances.classIndex()).numValues();
 		List<HyperParameters> options  = HyperParameters.getHyperParametersPermutations();
@@ -43,10 +43,9 @@ public class Knn implements Classifier {
 				bestError = error;
 				bestHyperParameters = hyperParameters;
 			}
-			System.out.println(hyperParameters + " - error:" + error);
 		}
 		this.hyperParameters = bestHyperParameters;
-		return bestHyperParameters;
+		return bestError;
 	}
 
 	/**
