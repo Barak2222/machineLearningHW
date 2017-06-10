@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Random;
 
+import weka.classifiers.functions.supportVector.PolyKernel;
+import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Instances;
 
 public class MainHW5 {
