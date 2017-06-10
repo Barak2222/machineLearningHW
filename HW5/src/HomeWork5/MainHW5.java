@@ -8,9 +8,6 @@ import java.text.MessageFormat;
 import java.util.Random;
 
 import weka.core.Instances;
-import weka.classifiers.functions.supportVector.Kernel;
-import weka.classifiers.functions.supportVector.PolyKernel;
-import weka.classifiers.functions.supportVector.RBFKernel;
 
 public class MainHW5 {
 
