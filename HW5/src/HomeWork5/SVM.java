@@ -14,48 +14,54 @@ public class SVM {
 	public SVM() {
 		this.m_smo = new SMO();
 	}
-	
-	public void buildClassifier(Instances instances) throws Exception{
+
+	public void buildClassifier(Instances instances) throws Exception {
 		m_smo.buildClassifier(instances);
 	}
-	
-	
+
 	/**
 	 * Setting the Weka SMO classifier kernel
-	 * @param newKernel - Kernel object
+	 * 
+	 * @param newKernel
+	 *            - Kernel object
 	 * @throws Exception
 	 */
-	public void setKernel(Kernel newKernel) throws Exception{
+	public void setKernel(Kernel newKernel) throws Exception {
 		m_kernel = newKernel;
 	}
-	
-	/** 
+
+	/**
 	 * Setting the C value for the Weka SMO classifier
-	 * @param newC - double
+	 * 
+	 * @param newC
+	 *            - double
 	 * @throws Exception
 	 */
-	public void setC(double newC) throws Exception{
+	public void setC(double newC) throws Exception {
 		m_C = newC;
 	}
-	
+
 	/**
 	 * Getting the C value for the Weka SMO classifier
+	 * 
 	 * @return double
 	 * @throws Exception
 	 */
-	public double getC() throws Exception{
+	public double getC() throws Exception {
 		return m_C;
 	}
-	
+
 	/**
 	 * Calculate the TP, FP, TN, FN for a given instances object
 	 * recurrence-events is the 0.0 class and will be the NEGATIVE class
 	 * no-recurrence-events is the 1.0 class and will be the POSITIVE class
-	 * @param Instances object
+	 * 
+	 * @param Instances
+	 *            object
 	 * @return int array of size 4 in this order [TP, FP, TN, FN]
 	 * @throws Exception
 	 */
-	public int[] calcConfusion(Instances instances) throws Exception{
+	public int[] calcConfusion(Instances instances) throws Exception {
 		int confusionArray[] = { 0, 0, 0, 0 };
 		for (Instance instance : instances) {
 			double predictedClass = m_smo.classifyInstance(instance);
