@@ -15,6 +15,7 @@ public class SVM {
 	}
 
 	public void buildClassifier(Instances instances) throws Exception {
+		m_smo.setKernel(m_kernel);
 		m_smo.buildClassifier(instances);
 	}
 
