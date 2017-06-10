@@ -1,6 +1,5 @@
 package HomeWork5;
 
-import HomeWork4.Knn.EvaluationTypes;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.Instance;
