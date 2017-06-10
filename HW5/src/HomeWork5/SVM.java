@@ -39,6 +39,7 @@ public class SVM {
 	 */
 	public void setC(double newC) throws Exception {
 		m_C = newC;
+		m_smo.setC(newC);
 	}
 
 	/**
