@@ -114,7 +114,7 @@ public class MainHW5 {
 					bestC = c;
 				}
 				System.out.println(MessageFormat.format("For C = {0} the rates are:\nTPR = {1}\nFPR = {2}",
-						c, errorData.get(EvaluationTypes.TPR), errorData.get(EvaluationTypes.FPR)));
+						Double.toString(c), errorData.get(EvaluationTypes.TPR), errorData.get(EvaluationTypes.FPR)));
 			}
 		}
 		System.out.print(MessageFormat.format("The best c is: {0} TPR={1}, FPR={2}",
