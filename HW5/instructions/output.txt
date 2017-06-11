@@ -1,0 +1,74 @@
+For PolyKernel with degree 2 the rates are:
+TPR = 0.811
+FPR = 0.55
+For PolyKernel with degree 3 the rates are:
+TPR = 0.838
+FPR = 0.55
+For PolyKernel with degree 4 the rates are:
+TPR = 0.892
+FPR = 0.65
+For RBFKernel with gamma 0.01 the rates are:
+TPR = 1
+FPR = 1
+For RBFKernel with gamma 0.1 the rates are:
+TPR = 0.973
+FPR = 0.9
+For RBFKernel with gamma 1 the rates are:
+TPR = 0.973
+FPR = 0.85
+The best kernel is: Poly with degree 3.0 TPR=0.838, FPR=0.55
+For C = 10.0 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 6.666666666666667 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 3.3333333333333335 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 1.0 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 0.6666666666666666 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 0.3333333333333333 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 0.10000000000000002 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 0.06666666666666667 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 0.03333333333333333 the rates are:
+TPR = 0.838
+FPR = 0.55
+For C = 0.01 the rates are:
+TPR = 0.865
+FPR = 0.65
+For C = 0.006666666666666667 the rates are:
+TPR = 0.892
+FPR = 0.65
+For C = 0.0033333333333333335 the rates are:
+TPR = 0.946
+FPR = 0.65
+For C = 0.001 the rates are:
+TPR = 1
+FPR = 0.85
+For C = 6.666666666666666E-4 the rates are:
+TPR = 1
+FPR = 0.95
+For C = 3.333333333333333E-4 the rates are:
+TPR = 1
+FPR = 1
+For C = 1.0E-4 the rates are:
+TPR = 1
+FPR = 1
+For C = 6.666666666666667E-5 the rates are:
+TPR = 1
+FPR = 1
+For C = 3.3333333333333335E-5 the rates are:
+TPR = 1
+FPR = 1
+The best c is: 0.003 TPR=0.946, FPR=0.65

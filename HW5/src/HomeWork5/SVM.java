@@ -69,13 +69,13 @@ public class SVM {
 			double actualClass = instance.value(instance.classIndex());
 
 			// Predicted positive
-			if (predictedClass == 0.0) {
-				if (actualClass == 0.0)
+			if (predictedClass == 1.0) {
+				if (actualClass == 1.0)
 					confusionArray[0]++; // TP
 				else
 					confusionArray[1]++; // FP
 			} else {// Predicted negative
-				if (actualClass == 1.0)
+				if (actualClass == 0.0)
 					confusionArray[2]++; // TN
 				else
 					confusionArray[3]++; // FN
