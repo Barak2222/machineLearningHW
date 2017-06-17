@@ -40,6 +40,7 @@ public class MainHW5 {
 	public static void main(String[] args) throws Exception {
 		Instances cancerInstances = loadData("cancer.txt");
 		shuffleInstances(cancerInstances);
+		shuffleInstances(cancerInstances);
 		
 		// Divide the data to training and test set - 80% training and 20% test
 		Instances trainingSet = new Instances(cancerInstances);
@@ -140,13 +141,6 @@ public class MainHW5 {
 		Map<EvaluationTypes, Double> results = new HashMap<>();
 		results.put(EvaluationTypes.TPR, (double) confusion[0] / (confusion[0] + confusion[3]));// TP / (TP + FN)
 		results.put(EvaluationTypes.FPR, (double) confusion[1] / (confusion[1] + confusion[2]));// FP / (FP + TN)
-		
-		// Handle corner case TODO
-		if(confusion[0] == 0){
-			results.put(EvaluationTypes.TPR, 1.0);
-			results.put(EvaluationTypes.FPR, 1.0);
-		}
-		
 		results.put(EvaluationTypes.BOTH, results.get(EvaluationTypes.TPR) - ALPHA * results.get(EvaluationTypes.FPR));
 		return results;
 	}
