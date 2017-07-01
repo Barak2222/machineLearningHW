@@ -23,7 +23,7 @@ public class KMeans {
 	 */
 	public void buildClusterModel(Instances instances, boolean printErrorInEachIteration) {
 		m_centroids = new Instances(instances);
-		m_centroids.clear();
+		m_centroids.delete();
 		initializeCentroids(instances);
 		m_printErrorInEachIteration = printErrorInEachIteration;
 		findKMeansCentroids(instances);
@@ -67,12 +67,12 @@ public class KMeans {
 	 */
 	private void findKMeansCentroids(Instances instances) {
 		Instances emptyInstances = new Instances(instances);
-		emptyInstances.clear();
+		emptyInstances.delete();
 		Instances newCentroids;
 		
 		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
 			newCentroids = new Instances(m_centroids);
-			newCentroids.clear();
+			newCentroids.delete();
 			System.out.println("findKMeansCentroids: Iteration #" + i);
 			resetCentroidsMap(emptyInstances);
 			System.out.println("Resetted centroid map");
