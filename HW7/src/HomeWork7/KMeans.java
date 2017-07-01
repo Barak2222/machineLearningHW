@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sun.javafx.collections.MappingChange.Map;
 
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -15,8 +13,8 @@ public class KMeans {
 	private int m_k;
 	private Instances m_centroids;
 	private boolean m_printErrorInEachIteration;
-	private HashMap<Instance, Instances> map;
 	private final int PRESET_NUMBER_OF_IERATIONS = 40;
+	private HashMap<Instance, Instances> map;
 	
 	/**
 	 * This method is building the KMeans object. It should initialize centroids (by calling initializeCentroids)
@@ -50,7 +48,14 @@ public class KMeans {
 		}
 		m_centroids.addAll(randomInstances);
 	}
-
+	
+	private void resetCentroidsMap(Instances instances){
+		for (Instance centroid : map.keySet()) {
+			Instances emptyInstances = new Instances(instances);
+			emptyInstances.clear();
+			map.put(centroid, emptyInstances);
+		}
+	}
 
 	/**
 	 * Should find and store the centroids according to the KMeans algorithm. Your stopping condition for when to stop
@@ -61,10 +66,40 @@ public class KMeans {
 	 * @param instances
 	 */
 	private void findKMeansCentroids(Instances instances) {
+		double newValue;
+		Instances newCentroids;
+		
 		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
-			for (int j = 0; j < instances.size(); j++) {
-				map.get(m_centroids.get(findClosestCentroid(instances.get(j))));
+			newCentroids = new Instances(m_centroids);
+			newCentroids.clear();
+			resetCentroidsMap(instances);
+			
+			// Assign each instance to their closest centroid8
+			for (Instance instance : instances)
+				map.get(m_centroids.get(findClosestCentroid(instance))).add(instance);
+			
+			for (Instance centroid : map.keySet()) {
+				Instance newCentroid = (Instance) centroid.copy();
+				// Clear new centroid attributes values
+				for (int j = 0; j < newCentroid.numAttributes(); j++)
+					newCentroid.setValue(j, 0);
+				
+				// Sum up all attributes
+				for (Instance instance : map.get(centroid)) {
+					for (int j = 0; j < instance.numAttributes(); j++){
+						newValue = newCentroid.value(j) + instance.value(j); 
+						newCentroid.setValue(j, newValue);
+					}
+				}
+				// Divide by number of instances
+				for (int j = 0; j < newCentroid.numAttributes(); j++)
+					newCentroid.setValue(j, newCentroid.value(j) / map.get(centroid).size());
+				
+				// Add new centroid to a temporary centroids list
+				newCentroids.add(newCentroid);
+				
 			}
+			m_centroids = newCentroids;
 			
 		}
 	}
