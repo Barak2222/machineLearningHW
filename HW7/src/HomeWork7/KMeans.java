@@ -18,6 +18,7 @@ public class KMeans {
 	void buildClusterModel(Instances instances) {
 		m_centroids = new Instances(instances);
 		m_centroids.clear();
+		findKMeansCentroids(instances);
 	}
 
 	public void setK(int k){
@@ -28,7 +29,7 @@ public class KMeans {
 	 * Initialize the centroids by selecting k random instances from the training set and setting the centroids to be those instances.
 	 * @param instances
 	 */
-	void initializeCentroids(Instances instances) {
+	private void initializeCentroids(Instances instances) {
 		if(instances.size() < m_k){
 			throw new IllegalArgumentException();
 		}
@@ -48,7 +49,8 @@ public class KMeans {
 	 * methods to determine when to stop iterating.
 	 * @param instances
 	 */
-	void findKMeansCentroids(Instances instances) {
+	private void findKMeansCentroids(Instances instances) {
+		initializeCentroids(instances);
 
 	}
 
@@ -61,7 +63,7 @@ public class KMeans {
 	 * @param b a centroid
 	 * @return should calculate the squared distance between the input instance and the input centroid.
 	 */
-	double calcSquaredDistanceFromCentroid(Instance a, Instance b) {
+	private double calcSquaredDistanceFromCentroid(Instance a, Instance b) {
 		
 		return -1;
 	}
@@ -71,7 +73,7 @@ public class KMeans {
 	 * @param instance
 	 * @return the index of the closest centroid to the input instance
 	 */
-	int findClosestCentroid(Instance instance) {
+	private int findClosestCentroid(Instance instance) {
 
 		return 0;
 	}
@@ -80,9 +82,9 @@ public class KMeans {
 	 *  Output: should replace every instance in Instances by the centroid to which it is assigned 
 	 *  (closest centroid) and return the new Instances object.
 	 * @param instances
-	 * @return  Output: should replace every instance in Instances by the centroid to which it is assigned (closest centroid) and return the new Instances object.
+	 * @return should replace every instance in Instances by the centroid to which it is assigned (closest centroid) and return the new Instances object.
 	 */
-	Instances quantize(Instances instances) {
+	public Instances quantize(Instances instances) {
 
 		return null;
 	}
@@ -93,7 +95,7 @@ public class KMeans {
 	 * @param instances
 	 * @return the double value of the WSSSE.
 	 */
-	double calcAvgWSSSE(Instances instances) {
+	public double calcAvgWSSSE(Instances instances) {
 
 		return -1;
 	}

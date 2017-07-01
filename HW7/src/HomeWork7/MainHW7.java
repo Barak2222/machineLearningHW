@@ -1,13 +1,15 @@
 package HomeWork7;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -98,7 +100,26 @@ public class MainHW7 {
 
 	public static void main(String[] args) throws Exception {
 		
+		// Create instances
+		BufferedImage image = ImageIO.read(new File("messi.jpg"));
+		int width = image.getWidth();
+		int height= image.getHeight();
+		Instances inputInstances = convertImgToInstances(image);
+		
+		KMeans kMeans = new KMeans();
+		kMeans.buildClusterModel(inputInstances);
+		for(int k : Arrays.asList(2, 3, 5, 10, 25, 50, 100, 256)){
+			Instances clonedInput = new Instances(inputInstances);
+			kMeans.setK(k);
+			kMeans.buildClusterModel(inputInstances);
+			Instances quantizedInstances = kMeans.quantize(clonedInput);
 
+			// Convert to image
+			File outputfile = new File(MessageFormat.format("output_k{0}.jpg", k));
+			RenderedImage out = convertInstancesToImg(quantizedInstances, width, height);
+			ImageIO.write(out , "jpg", outputfile);
+		}
+		
 	}
 }
 
