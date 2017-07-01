@@ -50,7 +50,7 @@ public class KMeans {
 	}
 	
 	private void resetCentroidsMap(Instances instances){
-		for (Instance centroid : map.keySet()) {
+		for (Instance centroid : m_centroids) {
 			Instances emptyInstances = new Instances(instances);
 			emptyInstances.clear();
 			map.put(centroid, emptyInstances);
