@@ -49,11 +49,11 @@ public class KMeans {
 		m_centroids.addAll(randomInstances);
 	}
 	
-	private void resetCentroidsMap(Instances instances){
+	private void resetCentroidsMap(Instances emptyInstances){
+		int i = 0;
 		for (Instance centroid : m_centroids) {
-			Instances emptyInstances = new Instances(instances);
-			emptyInstances.clear();
-			map.put(centroid, emptyInstances);
+			System.out.println("resetCentroidsMap: Iteration #" + (i++));
+			map.put(centroid, new Instances(emptyInstances));
 		}
 	}
 
@@ -66,12 +66,16 @@ public class KMeans {
 	 * @param instances
 	 */
 	private void findKMeansCentroids(Instances instances) {
+		Instances emptyInstances = new Instances(instances);
+		emptyInstances.clear();
 		Instances newCentroids;
 		
 		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
 			newCentroids = new Instances(m_centroids);
 			newCentroids.clear();
-			resetCentroidsMap(instances);
+			System.out.println("findKMeansCentroids: Iteration #" + i);
+			resetCentroidsMap(emptyInstances);
+			System.out.println("Resetted centroid map");
 			
 			// Assign each instance to their closest centroid8
 			for (Instance instance : instances)
