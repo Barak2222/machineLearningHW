@@ -3,6 +3,7 @@ package HomeWork7;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -14,7 +15,7 @@ public class KMeans {
 	private Instances m_centroids;
 	private boolean m_printErrorInEachIteration;
 	private final int PRESET_NUMBER_OF_IERATIONS = 40;
-	private HashMap<Instance, Instances> map;
+	private HashMap<Instance, Instances> m_centroidsMap;
 	
 	/**
 	 * This method is building the KMeans object. It should initialize centroids (by calling initializeCentroids)
@@ -24,6 +25,7 @@ public class KMeans {
 	public void buildClusterModel(Instances instances, boolean printErrorInEachIteration) {
 		m_centroids = new Instances(instances);
 		m_centroids.delete();
+		m_centroidsMap = new HashMap<Instance, Instances>();
 		initializeCentroids(instances);
 		m_printErrorInEachIteration = printErrorInEachIteration;
 		findKMeansCentroids(instances);
@@ -41,19 +43,15 @@ public class KMeans {
 		if(instances.size() < m_k){
 			throw new IllegalArgumentException();
 		}
-		Set<Instance> randomInstances = new HashSet<>();
-		while(randomInstances.size() < m_k){
-			int rand = (int) (m_k * Math.random());
-			randomInstances.add(instances.get(rand));
-		}
-		m_centroids.addAll(randomInstances);
+		for (int i = 0; i < m_k; i++)
+			m_centroids.add(instances.get(new Random().nextInt(instances.size())));
 	}
 	
 	private void resetCentroidsMap(Instances emptyInstances){
 		int i = 0;
 		for (Instance centroid : m_centroids) {
 			System.out.println("resetCentroidsMap: Iteration #" + (i++));
-			map.put(centroid, new Instances(emptyInstances));
+			m_centroidsMap.put(centroid, new Instances(emptyInstances));
 		}
 	}
 
@@ -75,27 +73,26 @@ public class KMeans {
 			newCentroids.delete();
 			System.out.println("findKMeansCentroids: Iteration #" + i);
 			resetCentroidsMap(emptyInstances);
-			System.out.println("Resetted centroid map");
 			
 			// Assign each instance to their closest centroid8
 			for (Instance instance : instances)
-				map.get(m_centroids.get(findClosestCentroid(instance))).add(instance);
+				m_centroidsMap.get(m_centroids.get(findClosestCentroid(instance))).add(instance);
 			
-			for (Instance centroid : map.keySet()) {
+			for (Instance centroid : m_centroidsMap.keySet()) {
 				Instance newCentroid = (Instance) centroid.copy();
 				// Clear new centroid attributes values
 				for (int j = 0; j < newCentroid.numAttributes(); j++)
 					newCentroid.setValue(j, 0);
 				
 				// Sum up all attributes
-				for (Instance instance : map.get(centroid)) {
+				for (Instance instance : m_centroidsMap.get(centroid)) {
 					for (int j = 0; j < instance.numAttributes(); j++){
 						newCentroid.setValue(j, newCentroid.value(j) + instance.value(j));
 					}
 				}
 				// Divide by number of instances
 				for (int j = 0; j < newCentroid.numAttributes(); j++)
-					newCentroid.setValue(j, newCentroid.value(j) / map.get(centroid).size());
+					newCentroid.setValue(j, newCentroid.value(j) / m_centroidsMap.get(centroid).size());
 				
 				// Add new centroid to a temporary centroids list
 				newCentroids.add(newCentroid);
