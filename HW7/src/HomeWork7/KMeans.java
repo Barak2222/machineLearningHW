@@ -51,62 +51,6 @@ public class KMeans {
 		m_centroids.addAll(centroidsSet);
 	}
 	
-//	private void resetCentroidsMap(Instances emptyInstances){
-//		int i = 0;
-//		for (Instance centroid : m_centroids) {
-//			System.out.println("resetCentroidsMap: Iteration #" + (i++));
-//			m_centroidsMap.put(centroid, new Instances(emptyInstances));
-//		}
-//	}
-
-	/**
-	 * Should find and store the centroids according to the KMeans algorithm. Your stopping condition for when to stop
-	 * iterating can be either when the centroids have not moved much from their previous location, 
-	 * the cost function did not change much, or you have reached a preset number of iterations. In this assignment we 
-	 * will only use the preset number option. A good preset number of iterations is 40. Use one or any combination of these 
-	 * methods to determine when to stop iterating.
-	 * @param instances
-	 *//**
-	private void findKMeansCentroids(Instances instances) {
-		Instances emptyInstances = new Instances(instances);
-		emptyInstances.delete();
-		Instances newCentroids;
-		
-		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
-			newCentroids = new Instances(m_centroids);
-			newCentroids.delete();
-//			System.out.println("findKMeansCentroids: Iteration #" + i);
-			resetCentroidsMap(emptyInstances);
-			
-			// Assign each instance to their closest centroid8
-			for (Instance instance : instances)
-				m_centroidsMap.get(m_centroids.get(findClosestCentroid(instance))).add(instance);
-			
-			for (Instance centroid : m_centroidsMap.keySet()) {
-				Instance newCentroid = (Instance) centroid.copy();
-				// Clear new centroid attributes values
-				for (int j = 0; j < newCentroid.numAttributes(); j++)
-					newCentroid.setValue(j, 0);
-				
-				// Sum up all attributes
-				for (Instance instance : m_centroidsMap.get(centroid)) {
-					for (int j = 0; j < instance.numAttributes(); j++){
-						newCentroid.setValue(j, newCentroid.value(j) + instance.value(j));
-					}
-				}
-				// Divide by number of instances
-				for (int j = 0; j < newCentroid.numAttributes(); j++)
-					newCentroid.setValue(j, newCentroid.value(j) / m_centroidsMap.get(centroid).size());
-				
-				// Add new centroid to a temporary centroids list
-				newCentroids.add(newCentroid);
-				
-			}
-			m_centroids = newCentroids;
-			
-		}
-	}*/
-	
 	/**
 	 * Should find and store the centroids according to the KMeans algorithm. Your stopping condition for when to stop
 	 * iterating can be either when the centroids have not moved much from their previous location, 
