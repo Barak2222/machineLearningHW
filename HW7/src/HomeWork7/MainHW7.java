@@ -118,11 +118,46 @@ public class MainHW7 {
 			RenderedImage out = convertInstancesToImg(quantizedInstances, width, height);
 			ImageIO.write(out , "jpg", outputfile);
 		}
-		
+
 		// PCA section
 		
+		System.out.println("average distance as function of the number of PCs");
 		Instances libras = loadData("libras.txt");
+		for(int i = 13; i <= 90; i++){
+			PrincipalComponents pca = new PrincipalComponents();
+			pca.setNumPrinComponents(i);
+			pca.setTransformBackToOriginal(true);
+			pca.buildEvaluator(libras);
+			Instances transformedData = pca.transformedData(libras);
+			double dist = calcAvgDistance(libras, transformedData);
+			System.out.println(MessageFormat.format("{0},{1}", i, Double.toString(dist)));
+		}
 	}
+	
+
+//	static double calcAvgDistance(Instances original, Instances transformed){
+//		 double[] averageVectorOriginal = getAverageVector(original);
+//		double[] averageVectorTransformed = getAverageVector(transformed);
+//		double sum = 0;
+//		for(int i = 0; i < averageVectorOriginal.length; i++){
+//			double diff = Math.abs(averageVectorOriginal[i] - averageVectorTransformed[i]);
+//			sum+= diff * diff;
+//		}
+//		return Math.sqrt(sum);
+//	}
+//	
+//	private static double[] getAverageVector(Instances instances){
+//		double[] result = new double[instances.numAttributes()];
+//		for (Instance instance : instances) {
+//			for(int i = 0; i < instance.numAttributes(); i++){
+//				result[i]+= instance.value(i);
+//			}
+//		}
+//		for(int i = 0; i < result.length; i++){
+//			result[i]/= instances.numInstances();
+//		}
+//		return result;
+//	}
 	
 	/**
 	 * Calculates the average Euclidean distance between the original data set and the transformed data set.
@@ -131,7 +166,18 @@ public class MainHW7 {
 	 * @return The average distance between the instances.
 	 */
 	static double calcAvgDistance(Instances original, Instances transformed){
-		return 0;
+		double sum = 0;
+		for(int i = 0; i < original.numInstances(); i++){
+			sum+= distanceBetweenTwoInstances(original.instance(i), transformed.instance(i));
+		}
+		return sum / original.numInstances();
+	}
+	private static double distanceBetweenTwoInstances(Instance a, Instance b){
+		double sum = 0;
+		for(int i = 0; i < a.numAttributes(); i++){
+			sum+= Math.pow(b.value(i) - a.value(i), 2);
+		}
+		return Math.sqrt(sum);
 	}
 }
 
