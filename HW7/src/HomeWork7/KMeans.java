@@ -1,11 +1,9 @@
 package HomeWork7;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Random;
+import java.util.Map;
 import java.util.Set;
-
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -15,7 +13,8 @@ public class KMeans {
 	private Instances m_centroids;
 	private boolean m_printErrorInEachIteration;
 	private final int PRESET_NUMBER_OF_IERATIONS = 40;
-	private HashMap<Instance, Instances> m_centroidsMap;
+//	private HashMap<Instance, Instances> m_centroidsMap;
+	private Instances m_emptyInstances;
 	
 	/**
 	 * This method is building the KMeans object. It should initialize centroids (by calling initializeCentroids)
@@ -23,9 +22,9 @@ public class KMeans {
 	 * @param instances
 	 */
 	public void buildClusterModel(Instances instances, boolean printErrorInEachIteration) {
-		m_centroids = new Instances(instances);
-		m_centroids.delete();
-		m_centroidsMap = new HashMap<Instance, Instances>();
+		m_emptyInstances = new Instances(instances);
+		m_emptyInstances.delete();
+//		m_centroidsMap = new HashMap<Instance, Instances>();
 		initializeCentroids(instances);
 		m_printErrorInEachIteration = printErrorInEachIteration;
 		findKMeansCentroids(instances);
@@ -43,17 +42,22 @@ public class KMeans {
 		if(instances.size() < m_k){
 			throw new IllegalArgumentException();
 		}
-		for (int i = 0; i < m_k; i++)
-			m_centroids.add(instances.get(new Random().nextInt(instances.size())));
+		m_centroids = new Instances(m_emptyInstances);
+		Set<Instance> centroidsSet = new HashSet<>();
+		while(centroidsSet.size() < m_k){
+			int randomIdx = (int) (Math.random() * instances.size());
+			centroidsSet.add(instances.get(randomIdx));
+		}
+		m_centroids.addAll(centroidsSet);
 	}
 	
-	private void resetCentroidsMap(Instances emptyInstances){
-		int i = 0;
-		for (Instance centroid : m_centroids) {
-			System.out.println("resetCentroidsMap: Iteration #" + (i++));
-			m_centroidsMap.put(centroid, new Instances(emptyInstances));
-		}
-	}
+//	private void resetCentroidsMap(Instances emptyInstances){
+//		int i = 0;
+//		for (Instance centroid : m_centroids) {
+//			System.out.println("resetCentroidsMap: Iteration #" + (i++));
+//			m_centroidsMap.put(centroid, new Instances(emptyInstances));
+//		}
+//	}
 
 	/**
 	 * Should find and store the centroids according to the KMeans algorithm. Your stopping condition for when to stop
@@ -62,7 +66,7 @@ public class KMeans {
 	 * will only use the preset number option. A good preset number of iterations is 40. Use one or any combination of these 
 	 * methods to determine when to stop iterating.
 	 * @param instances
-	 */
+	 *//**
 	private void findKMeansCentroids(Instances instances) {
 		Instances emptyInstances = new Instances(instances);
 		emptyInstances.delete();
@@ -71,7 +75,7 @@ public class KMeans {
 		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
 			newCentroids = new Instances(m_centroids);
 			newCentroids.delete();
-			System.out.println("findKMeansCentroids: Iteration #" + i);
+//			System.out.println("findKMeansCentroids: Iteration #" + i);
 			resetCentroidsMap(emptyInstances);
 			
 			// Assign each instance to their closest centroid8
@@ -101,8 +105,77 @@ public class KMeans {
 			m_centroids = newCentroids;
 			
 		}
+	}*/
+	
+	/**
+	 * Should find and store the centroids according to the KMeans algorithm. Your stopping condition for when to stop
+	 * iterating can be either when the centroids have not moved much from their previous location, 
+	 * the cost function did not change much, or you have reached a preset number of iterations. In this assignment we 
+	 * will only use the preset number option. A good preset number of iterations is 40. Use one or any combination of these 
+	 * methods to determine when to stop iterating.
+	 * @param instances
+	 */
+	private void findKMeansCentroids(Instances instances) {
+		
+		// Main loop => try to improve centroids PRESET_NUMBER_OF_IERATIONS times 
+		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
+			Map<Instance, Instances> centroidToCloseInstances = createCentroidsMap(instances);
+			Instances newCentroids = cloneInstancesRecursivly(m_centroids);
+			int centroidsIndex = 0;
+
+			// Iterate centroids
+			for (Instances instancesForCentroid : centroidToCloseInstances.values()) {
+				
+				// Iterate attributes
+				for(int attrIdx = 0; attrIdx < instances.numAttributes(); attrIdx++){
+					double meanAttrValue = 0;
+					
+					// Iterate instances of current centroid
+					for (Instance instance : instancesForCentroid) {
+						meanAttrValue+= instance.value(attrIdx);
+					}
+					meanAttrValue/= instancesForCentroid.size();
+					newCentroids.get(centroidsIndex).setValue(attrIdx, meanAttrValue);
+				}
+				centroidsIndex++;
+			}
+			m_centroids = newCentroids;
+		}
+	}
+	
+	/**
+	 * Clone instances object, and copy each instance object to a new object
+	 * @param instances
+	 * @return
+	 */
+	private Instances cloneInstancesRecursivly(Instances instances){
+		Instances newInstances = new Instances(m_emptyInstances);
+		for (Instance instance : instances) {
+			newInstances.add((Instance) instance.copy());
+		}
+		return newInstances;
 	}
 
+	/**
+	 * Create a map that connects each instance to its closest centroid
+	 * @param instances
+	 * @return a map from each each centroids to the instances that are closest to it
+	 */
+	private Map<Instance, Instances> createCentroidsMap(Instances instances) {
+		
+		// Initialize map
+		Map<Instance, Instances> result = new HashMap<>();
+		for (Instance centroid : m_centroids) {
+			result.put(centroid, new Instances(m_emptyInstances));
+		}
+		
+		// Iterate instances
+		for (Instance instance : instances) {
+			Instance centroid = m_centroids.get(findClosestCentroid(instance));
+			result.get(centroid).add(instance);
+		}
+		return result;
+	}
 
 	/**
 	 *  Input: 2 Instance objects – one is an instance from the dataset and one is a centroid (if you're using different 
