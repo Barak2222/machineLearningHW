@@ -104,10 +104,12 @@ public class KMeans {
 	 * @return should replace every instance in Instances by the centroid to which it is assigned (closest centroid) and return the new Instances object.
 	 */
 	public Instances quantize(Instances instances) {
-
-		return null;
+		for(int i = 0; i < instances.size(); i++){
+			instances.set(i, m_centroids.get(findClosestCentroid(instances.get(i))));
+		}
+		return instances;
 	}
-	
+
 	/**
 	 * Calculate the average within set sum of squared errors. That is it should calculate the average squared distance of every
 	 * instance from the centroid to which it is assigned. This is Tr(Sc) from class, divided by the number of instances. 
@@ -115,8 +117,12 @@ public class KMeans {
 	 * @return the double value of the WSSSE.
 	 */
 	public double calcAvgWSSSE(Instances instances) {
-
-		return -1;
+		double sum = 0;
+		for (Instance instance : instances) {
+			Instance centroid = m_centroids.get(findClosestCentroid(instance));
+			sum+= calcSquaredDistanceFromCentroid(centroid, instance);
+		}
+		return sum/= instances.size();
 	}
 
 }
