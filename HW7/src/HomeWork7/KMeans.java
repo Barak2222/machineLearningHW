@@ -188,7 +188,7 @@ public class KMeans {
 	private double calcSquaredDistanceFromCentroid(Instance a, Instance b) {
 		double squaredDistance = 0;
 		for (int i = 0; i < a.numAttributes(); i++) {
-			squaredDistance += Math.pow(a.value(i), b.value(i));
+			squaredDistance += Math.pow(a.value(i) - b.value(i), 2);
 		}
 		squaredDistance = Math.sqrt(squaredDistance);
 		
