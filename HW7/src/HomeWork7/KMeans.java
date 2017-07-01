@@ -1,10 +1,13 @@
 package HomeWork7;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.sun.javafx.collections.MappingChange.Map;
 
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -12,7 +15,8 @@ public class KMeans {
 	private int m_k;
 	private Instances m_centroids;
 	private boolean m_printErrorInEachIteration;
-	private HashMap<Instance, Instances>;
+	private HashMap<Instance, Instances> map;
+	private final int PRESET_NUMBER_OF_IERATIONS = 40;
 	
 	/**
 	 * This method is building the KMeans object. It should initialize centroids (by calling initializeCentroids)
@@ -47,6 +51,7 @@ public class KMeans {
 		m_centroids.addAll(randomInstances);
 	}
 
+
 	/**
 	 * Should find and store the centroids according to the KMeans algorithm. Your stopping condition for when to stop
 	 * iterating can be either when the centroids have not moved much from their previous location, 
@@ -56,8 +61,12 @@ public class KMeans {
 	 * @param instances
 	 */
 	private void findKMeansCentroids(Instances instances) {
-		
-		// ... TODO
+		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
+			for (int j = 0; j < instances.size(); j++) {
+				map.get(m_centroids.get(findClosestCentroid(instances.get(j))));
+			}
+			
+		}
 	}
 
 
@@ -88,7 +97,7 @@ public class KMeans {
 		double minDistance = calcSquaredDistanceFromCentroid(instance, m_centroids.get(0));
 		int closestIdx = 0;
 		double tmpDistance;
-		for (int i = 1; i < m_centroids.numInstances(); i++) {
+		for (int i = 1; i < m_centroids.size(); i++) {
 			tmpDistance = calcSquaredDistanceFromCentroid(instance, m_centroids.get(i));
 			if (tmpDistance < minDistance){ 
 				minDistance = tmpDistance;
