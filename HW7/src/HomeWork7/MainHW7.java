@@ -107,11 +107,10 @@ public class MainHW7 {
 		Instances inputInstances = convertImgToInstances(image);
 		
 		KMeans kMeans = new KMeans();
-		kMeans.buildClusterModel(inputInstances);
 		for(int k : Arrays.asList(2, 3, 5, 10, 25, 50, 100, 256)){
 			Instances clonedInput = new Instances(inputInstances);
 			kMeans.setK(k);
-			kMeans.buildClusterModel(inputInstances);
+			kMeans.buildClusterModel(inputInstances, k == 5);
 			Instances quantizedInstances = kMeans.quantize(clonedInput);
 
 			// Convert to image
@@ -120,6 +119,19 @@ public class MainHW7 {
 			ImageIO.write(out , "jpg", outputfile);
 		}
 		
+		// PCA section
+		
+		Instances libras = loadData("libras.txt");
+	}
+	
+	/**
+	 * Calculates the average Euclidean distance between the original data set and the transformed data set.
+	 * @param original instances object
+	 * @param b transformed instances object
+	 * @return The average distance between the instances.
+	 */
+	static double calcAvgDistance(Instances original, Instances transformed){
+		return 0;
 	}
 }
 

@@ -9,15 +9,17 @@ import weka.core.Instances;
 public class KMeans {
 	private int m_k;
 	private Instances m_centroids;
-	 
+	private boolean m_printErrorInEachIteration;
+	
 	/**
 	 * This method is building the KMeans object. It should initialize centroids (by calling initializeCentroids)
 	 * and run the K-Means algorithm (which means to call findKMeansCentroids methods).
 	 * @param instances
 	 */
-	void buildClusterModel(Instances instances) {
+	void buildClusterModel(Instances instances, boolean printErrorInEachIteration) {
 		m_centroids = new Instances(instances);
 		m_centroids.clear();
+		m_printErrorInEachIteration = printErrorInEachIteration;
 		findKMeansCentroids(instances);
 	}
 
@@ -51,7 +53,7 @@ public class KMeans {
 	 */
 	private void findKMeansCentroids(Instances instances) {
 		initializeCentroids(instances);
-
+		// ... TODO
 	}
 
 
