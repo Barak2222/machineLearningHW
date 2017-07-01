@@ -134,31 +134,6 @@ public class MainHW7 {
 		}
 	}
 	
-
-//	static double calcAvgDistance(Instances original, Instances transformed){
-//		 double[] averageVectorOriginal = getAverageVector(original);
-//		double[] averageVectorTransformed = getAverageVector(transformed);
-//		double sum = 0;
-//		for(int i = 0; i < averageVectorOriginal.length; i++){
-//			double diff = Math.abs(averageVectorOriginal[i] - averageVectorTransformed[i]);
-//			sum+= diff * diff;
-//		}
-//		return Math.sqrt(sum);
-//	}
-//	
-//	private static double[] getAverageVector(Instances instances){
-//		double[] result = new double[instances.numAttributes()];
-//		for (Instance instance : instances) {
-//			for(int i = 0; i < instance.numAttributes(); i++){
-//				result[i]+= instance.value(i);
-//			}
-//		}
-//		for(int i = 0; i < result.length; i++){
-//			result[i]/= instances.numInstances();
-//		}
-//		return result;
-//	}
-	
 	/**
 	 * Calculates the average Euclidean distance between the original data set and the transformed data set.
 	 * @param original instances object

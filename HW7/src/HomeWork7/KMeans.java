@@ -60,6 +60,9 @@ public class KMeans {
 	 * @param instances
 	 */
 	private void findKMeansCentroids(Instances instances) {
+		if(m_printErrorInEachIteration){
+			System.out.println("Error in rach iteration of K-Means algorithm:");
+		}
 		
 		// Main loop => try to improve centroids PRESET_NUMBER_OF_IERATIONS times 
 		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
@@ -82,6 +85,9 @@ public class KMeans {
 					newCentroids.get(centroidsIndex).setValue(attrIdx, meanAttrValue);
 				}
 				centroidsIndex++;
+			}
+			if(m_printErrorInEachIteration){
+				System.out.println(calcAvgWSSSE(instances));
 			}
 			m_centroids = newCentroids;
 		}
