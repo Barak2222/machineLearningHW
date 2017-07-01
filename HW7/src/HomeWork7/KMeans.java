@@ -13,7 +13,6 @@ public class KMeans {
 	private Instances m_centroids;
 	private boolean m_printErrorInEachIteration;
 	private final int PRESET_NUMBER_OF_IERATIONS = 40;
-//	private HashMap<Instance, Instances> m_centroidsMap;
 	private Instances m_emptyInstances;
 	
 	/**
@@ -24,7 +23,6 @@ public class KMeans {
 	public void buildClusterModel(Instances instances, boolean printErrorInEachIteration) {
 		m_emptyInstances = new Instances(instances);
 		m_emptyInstances.delete();
-//		m_centroidsMap = new HashMap<Instance, Instances>();
 		initializeCentroids(instances);
 		m_printErrorInEachIteration = printErrorInEachIteration;
 		findKMeansCentroids(instances);
