@@ -3,6 +3,8 @@ package HomeWork7;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sun.javafx.collections.MappingChange.Map;
+
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -10,6 +12,7 @@ public class KMeans {
 	private int m_k;
 	private Instances m_centroids;
 	private boolean m_printErrorInEachIteration;
+	private HashMap<Instance, Instances>;
 	
 	/**
 	 * This method is building the KMeans object. It should initialize centroids (by calling initializeCentroids)
@@ -19,6 +22,7 @@ public class KMeans {
 	void buildClusterModel(Instances instances, boolean printErrorInEachIteration) {
 		m_centroids = new Instances(instances);
 		m_centroids.clear();
+		initializeCentroids(instances);
 		m_printErrorInEachIteration = printErrorInEachIteration;
 		findKMeansCentroids(instances);
 	}
@@ -52,7 +56,7 @@ public class KMeans {
 	 * @param instances
 	 */
 	private void findKMeansCentroids(Instances instances) {
-		initializeCentroids(instances);
+		
 		// ... TODO
 	}
 
@@ -66,8 +70,13 @@ public class KMeans {
 	 * @return should calculate the squared distance between the input instance and the input centroid.
 	 */
 	private double calcSquaredDistanceFromCentroid(Instance a, Instance b) {
+		double squaredDistance = 0;
+		for (int i = 0; i < a.numAttributes(); i++) {
+			squaredDistance += Math.pow(a.value(i), b.value(i));
+		}
+		squaredDistance = Math.sqrt(squaredDistance);
 		
-		return -1;
+		return squaredDistance;
 	}
 
 	/**
@@ -76,8 +85,17 @@ public class KMeans {
 	 * @return the index of the closest centroid to the input instance
 	 */
 	private int findClosestCentroid(Instance instance) {
-
-		return 0;
+		double minDistance = calcSquaredDistanceFromCentroid(instance, m_centroids.get(0));
+		int closestIdx = 0;
+		double tmpDistance;
+		for (int i = 1; i < m_centroids.numInstances(); i++) {
+			tmpDistance = calcSquaredDistanceFromCentroid(instance, m_centroids.get(i));
+			if (tmpDistance < minDistance){ 
+				minDistance = tmpDistance;
+				closestIdx = i;
+			}
+		}
+		return closestIdx;
 	}
 
 	/**
