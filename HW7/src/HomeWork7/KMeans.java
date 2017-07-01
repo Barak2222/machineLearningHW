@@ -66,7 +66,6 @@ public class KMeans {
 	 * @param instances
 	 */
 	private void findKMeansCentroids(Instances instances) {
-		double newValue;
 		Instances newCentroids;
 		
 		for (int i = 0; i < PRESET_NUMBER_OF_IERATIONS; i++) {
@@ -87,8 +86,7 @@ public class KMeans {
 				// Sum up all attributes
 				for (Instance instance : map.get(centroid)) {
 					for (int j = 0; j < instance.numAttributes(); j++){
-						newValue = newCentroid.value(j) + instance.value(j); 
-						newCentroid.setValue(j, newValue);
+						newCentroid.setValue(j, newCentroid.value(j) + instance.value(j));
 					}
 				}
 				// Divide by number of instances
