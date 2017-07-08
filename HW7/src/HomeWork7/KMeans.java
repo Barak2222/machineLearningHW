@@ -59,7 +59,7 @@ public class KMeans {
 	 */
 	private void findKMeansCentroids(Instances instances) {
 		if(m_printErrorInEachIteration){
-			System.out.println("Error in rach iteration of K-Means algorithm:");
+			System.out.println("Error in each iteration of K-Means algorithm:");
 		}
 		
 		// Main loop => try to improve centroids PRESET_NUMBER_OF_IERATIONS times 
@@ -138,7 +138,6 @@ public class KMeans {
 		for (int i = 0; i < a.numAttributes(); i++) {
 			squaredDistance += Math.pow(a.value(i) - b.value(i), 2);
 		}
-		squaredDistance = Math.sqrt(squaredDistance);
 		
 		return squaredDistance;
 	}
